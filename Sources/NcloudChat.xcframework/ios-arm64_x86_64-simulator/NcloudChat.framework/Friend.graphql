@@ -1,0 +1,160 @@
+query friendships (
+    $projectId: String!,
+    $filter: String!,
+    $sort: String,
+    $option: String
+    ) {
+    friendships (
+        projectId: $projectId,
+        filter:$filter,
+        sort:$sort,
+        option: $option
+    ) {
+        totalCount
+        edges {
+            node {
+                project_id
+                id
+                status
+                user {
+                    id
+                    name
+                    profile
+                }
+                friend {
+                    id
+                    name
+                    profile
+                }
+                friend_id
+                created_at
+                updated_at
+                requested_at
+            }
+        }
+    }
+}
+
+mutation requestFriend(
+    $projectId: String!,
+    $friendId: String!
+    ) {
+    requestFriend(
+        input: {
+            projectId: $projectId,
+            friendId: $friendId }
+    ) {
+        friendship {
+            project_id
+            id
+            status
+            user {
+                id
+                name
+                profile
+            }
+            friend {
+                id
+                name
+                profile
+            }
+            friend_id
+            created_at
+            updated_at
+            requested_at
+        }
+    }
+}
+
+mutation acceptFriend(
+    $projectId: String!,
+    $friendId: String!
+    ) {
+    acceptFriend(
+        input: {
+            projectId: $projectId,
+            friendId: $friendId }
+    ) {
+        friendship {
+            project_id
+            id
+            status
+            user {
+                id
+                name
+                profile
+            }
+            friend {
+                id
+                name
+                profile
+            }
+            friend_id
+            created_at
+            updated_at
+            requested_at
+        }
+    }
+}
+
+mutation rejectFriend(
+    $projectId: String!,
+    $friendId: String!
+    ) {
+    rejectFriend(
+        input: {
+            projectId: $projectId,
+            friendId: $friendId }
+    ) {
+        friendship {
+            project_id
+            id
+            status
+            user {
+                id
+                name
+                profile
+            }
+            friend {
+                id
+                name
+                profile
+            }
+            friend_id
+            created_at
+            updated_at
+            requested_at
+        }
+    }
+}
+
+mutation removeFriend(
+    $projectId: String!,
+    $friendId: String!
+    ) {
+    removeFriend(
+        input: {
+            projectId: $projectId,
+            friendId: $friendId }
+    ) {
+        friendship {
+            project_id
+            id
+            status
+            user {
+                id
+                name
+                profile
+            }
+            friend {
+                id
+                name
+                profile
+            }
+            friend_id
+            created_at
+            updated_at
+            requested_at
+        }
+    }
+}

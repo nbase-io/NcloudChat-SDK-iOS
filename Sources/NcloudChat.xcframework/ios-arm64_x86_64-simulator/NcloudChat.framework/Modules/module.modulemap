@@ -1,0 +1,11 @@
+framework module NcloudChat {
+  umbrella header "NcloudChat.h"
+
+  export *
+  module * { export * }
+}
+
+module NcloudChat.Swift {
+  header "NcloudChat-Swift.h"
+  requires objc
+}

@@ -1,0 +1,181 @@
+mutation createSubscription (
+    $projectId: String!,
+    $channelId: String!,
+    $option: String,
+) {
+    createSubscription (
+        input: {
+            projectId: $projectId,
+            channelId: $channelId,
+            option: $option
+        }
+    ) {
+        subscription {
+            id
+            channel_id
+            user_id
+            language
+            push
+            mute
+            online
+            channel {
+                name
+                type
+                image_url
+                push
+                disabled
+            }
+            mark {
+                user_id
+                message_id
+                sort_id
+                unread
+            }
+            uniquekey
+            created_at
+            updated_at
+        }
+    }
+}
+
+mutation deleteSubscription (
+    $projectId: String!,
+    $channelId: String!
+) {
+    deleteSubscription (
+        input: {
+            projectId: $projectId,
+            channelId: $channelId
+        }
+    ) {
+        subscription {
+            id
+            channel_id
+            user_id
+            language
+            push
+            mute
+            online
+            channel {
+                name
+                type
+                image_url
+                push
+                disabled
+            }
+            mark {
+                user_id
+                message_id
+                sort_id
+                unread
+            }
+            uniquekey
+            created_at
+            updated_at
+        }
+    }
+}
+
+mutation updateSubscription(
+        $projectId: String!,
+        $channelId: String!,
+        $mark: MarkInput,
+        $option: String!
+) {
+    updateSubscription(
+        input: {
+            projectId:
+            $projectId,
+            channelId:
+            $channelId,
+            mark: $mark,
+            option: $option
+        }
+    ) {
+        subscription {
+            id
+            channel_id
+            user_id
+            language
+            push
+            mute
+            online
+            channel {
+                name
+                type
+                image_url
+                push
+                disabled
+            }
+            mark {
+                user_id
+                message_id
+                sort_id
+                unread
+            }
+            uniquekey
+            created_at
+            updated_at
+        }
+    }
+}
+
+query subscription (
+    $projectId: String!,
+    $channelId: String!,
+    $id: String!
+) {
+    subscription (
+        projectId: $projectId,
+        channelId: $channelId,
+        id:$id
+    ) {
+        id
+        user {
+            name
+            profile
+            country
+        }
+        mark {
+            user_id
+            message_id
+            sort_id
+        }
+        channel_id
+        user_id
+        online
+        push
+        created_at
+    }
+}
+
+query subscriptions (
+    $projectId: String!,
+    $option: String!,
+    $filter: String!,
+    $sort: String
+) {
+    subscriptions (
+        projectId: $projectId,
+        option:$option,
+        filter:$filter,
+        sort:$sort
+    ) {
+        totalCount
+        edges {
+            node {
+                id
+                user {
+                    name
+                    profile
+                    country
+                }
+                channel_id
+                user_id
+                online
+                push
+                created_at
+            }
+        }
+    }
+}
