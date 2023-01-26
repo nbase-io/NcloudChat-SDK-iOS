@@ -1,0 +1,371 @@
+query channel($id: String, $projectId: String!, $uniqueId: String) {
+    channel(projectId: $projectId, id:$id, uniqueId:$uniqueId) {
+        id
+        project_id
+        name
+        user_id {
+            id
+            name
+            profile
+            device_type
+            language
+        }
+        unique_id
+        type
+        translation
+        members
+        push
+        link_url
+        image_url
+        created_at
+        updated_at
+        last_message {
+        message_id
+        sort_id
+        project_id
+        channel_id
+        message_type
+        mentions
+        mentions_everyone
+        has
+        sender {
+            id
+            name
+            profile
+        }
+        admin {
+            id
+            name
+            profile
+        }
+        content
+        created_at
+        }
+    }
+}
+
+query channels($projectId: String!, $filter: String!, $sort: String, $option:String) {
+    channels(projectId: $projectId, filter:$filter, sort:$sort, option:$option) {
+        totalCount
+        edges {
+            node {
+                id
+                project_id
+                name
+                user_id {
+                    id
+                    name
+                    profile
+                    device_type
+                    language
+                }
+                unique_id
+                type
+                translation
+                members
+                push
+                link_url
+                image_url
+                created_at
+                updated_at
+                last_message {
+                    message_id
+                    sort_id
+                    project_id
+                    channel_id
+                    message_type
+                    mentions
+                    mentions_everyone
+                    has
+                    sender {
+                        id
+                        name
+                        profile
+                    }
+                    admin {
+                        id
+                        name
+                        profile
+                    }
+                    content
+                    created_at
+                }
+            }
+        }
+    }
+}
+
+
+mutation createChannel(
+    $projectId: String!,
+    $name: String!,
+    $type: String!,
+    $uniqueId: String,
+    $members: [String],
+    $customField: String,
+    $disabled: Boolean,
+    $mutes: Boolean,
+    $push: Boolean,
+    $imageUrl: String,
+    $id: String,
+    $translation: Boolean
+    ) {
+    createChannel(
+        input: {
+            projectId: $projectId,
+            name: $name,
+            type: $type,
+            members: $members,
+            uniqueId: $uniqueId,
+            customField: $customField,
+            disabled: $disabled,
+            mutes: $mutes,
+            push: $push,
+            imageUrl: $imageUrl,
+            id: $id,
+            translation: $translation
+        }
+    ) {
+        channel {
+            id
+            project_id
+            name
+            user_id {
+                id
+                name
+                profile
+                device_type
+                language
+            }
+            unique_id
+            type
+            translation
+            members
+            push
+            link_url
+            image_url
+            created_at
+            updated_at
+            last_message {
+                message_id
+                sort_id
+                project_id
+                channel_id
+                message_type
+                mentions
+                mentions_everyone
+                has
+                sender {
+                    id
+                    name
+                    profile
+                }
+                admin {
+                    id
+                    name
+                    profile
+                }
+                content
+                created_at
+            }
+        }
+    }
+}
+
+mutation updateChannel(
+    $projectId: String!,
+    $name: String,
+    $type: String,
+    $uniqueId: String,
+    $translation: Boolean,
+    $push: Boolean,
+    $imageUrl: String,
+    $id: ID!,
+    $members: [String]
+    ) {
+    updateChannel(
+        input: {
+            projectId: $projectId,
+            name: $name,
+            type: $type,
+            id: $id,
+            members: $members,
+            uniqueId: $uniqueId,
+            translation:$translation,
+            push:$push,
+            imageUrl:$imageUrl
+        }
+    ) {
+        channel {
+            id
+            project_id
+            name
+            user_id {
+                id
+                name
+                profile
+                device_type
+                language
+            }
+            unique_id
+            type
+            translation
+            members
+            push
+            link_url
+            image_url
+            created_at
+            updated_at
+            last_message {
+                message_id
+                sort_id
+                project_id
+                channel_id
+                message_type
+                mentions
+                mentions_everyone
+                has
+                sender {
+                    id
+                    name
+                    profile
+                }
+                admin {
+                    id
+                    name
+                    profile
+                }
+                content
+                created_at
+            }
+        }
+    }
+}
+
+mutation deleteChannel(
+    $projectId: String!,
+    $id: ID!
+    ) {
+    deleteChannel(
+        input: {
+            projectId: $projectId,
+            id: $id,
+        }
+    ) {
+        channel {
+            id
+            project_id
+            name
+            user_id {
+                id
+                name
+                profile
+                device_type
+                language
+            }
+            unique_id
+            type
+            translation
+            members
+            push
+            link_url
+            image_url
+            created_at
+            updated_at
+            last_message {
+                message_id
+                sort_id
+                project_id
+                channel_id
+                message_type
+                mentions
+                mentions_everyone
+                has
+                sender {
+                    id
+                    name
+                    profile
+                }
+                admin {
+                    id
+                    name
+                    profile
+                }
+                content
+                created_at
+            }
+        }
+    }
+}
+
+mutation addChannelMembers(
+    $projectId: String!,
+    $channelId: String!,
+    $memberIds: [String]!
+    ) {
+    addChannelMembers(
+        input: {
+            projectId: $projectId,
+            channelId: $channelId,
+            memberIds:$memberIds
+        }
+    ) {
+        channel {
+            id
+            project_id
+            name
+            user_id {
+                id
+                name
+                profile
+                device_type
+                language
+            }
+            unique_id
+            type
+            translation
+            members
+            push
+            link_url
+            image_url
+            created_at
+            updated_at
+        }
+    }
+}
+
+mutation removeChannelMembers(
+    $projectId: String!,
+    $channelId: String!,
+    $memberIds: [String]!
+    ) {
+    removeChannelMembers(
+        input: {
+            projectId: $projectId,
+            channelId: $channelId,
+            memberIds:$memberIds
+        }
+    ) {
+        channel {
+            id
+            project_id
+            name
+            user_id {
+                id
+                name
+                profile
+                device_type
+                language
+            }
+            unique_id
+            type
+            translation
+            members
+            push
+            link_url
+            image_url
+            created_at
+            updated_at
+        }
+    }
+}

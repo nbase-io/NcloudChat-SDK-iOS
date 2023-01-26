@@ -1,0 +1,135 @@
+
+query message (
+    $projectId: String!,
+    $channelId: String!,
+    $id: ID!
+) {
+    message(
+        projectId: $projectId,
+        channelId:$channelId,
+        id:$id
+    ) {
+        id
+        message_id
+        channel_id
+        sort_id
+        message_type
+        sender {
+            id
+            name
+            profile
+        }
+        admin {
+            id
+            name
+        }
+        mentions
+        mentions_everyone
+        content
+        sended_at
+        created_at
+    }
+}
+
+query messages (
+    $projectId: String!,
+    $filter: String!,
+    $option: String,
+    $sort: String
+) {
+    messages(
+        projectId: $projectId,
+        filter: $filter,
+        option:$option,
+        sort:$sort
+    ) {
+        totalCount
+        edges {
+            node {
+                id
+                message_id
+                channel_id
+                sort_id
+                message_type
+                sender {
+                    id
+                    name
+                    profile
+                }
+                admin {
+                    id
+                    name
+                }
+                mentions
+                mentions_everyone
+                content
+                sended_at
+                created_at
+            }
+        }
+    }
+}
+
+query mark (
+    $projectId: String!,
+    $channelId: String!
+) {
+    mark (
+        projectId: $projectId,
+        channelId:$channelId
+    ) {
+        user_id,
+        message_id,
+        sort_id,
+        unread
+    }
+}
+
+mutation createChannelMessage (
+    $projectId: String!,
+    $channelId: String!,
+    $content: String!
+) {
+    createChannelMessage(
+        input: {
+            projectId: $projectId,
+            channelId: $channelId,
+            content: $content
+        }
+    ) {
+        message {
+            id
+            message_id
+            channel_id
+            sort_id
+            message_type
+            sender {
+                id
+                name
+                profile
+            }
+            admin {
+                id
+                name
+                profile
+            }
+            attachment_filenames {
+                name
+                size
+                type
+                url
+            }
+            has
+            embed_providers
+            embed_type
+            isExpress
+            link_hostnames
+            mentions
+            bytes
+            mentions_everyone
+            content
+            sended_at
+            created_at
+        }
+    }
+}

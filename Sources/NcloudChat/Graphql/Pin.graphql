@@ -1,0 +1,127 @@
+query pin (
+    $projectId: String!,
+    $channelId: String!,
+    $id: String!
+) {
+    pin (
+        projectId: $projectId,
+        channelId: $channelId,
+        id:$id
+    ) {
+        id
+        project_id
+        channel_id
+        pinned
+        pinnedAt
+        user_id {
+            id
+            name
+            profile
+        }
+        expiredAt
+        createdAt
+    }
+}
+
+query pins (
+    $projectId: String!,
+    $channelId: String!,
+    $filter: String!,
+    $option: String,
+    $sort: String
+) {
+    pins (
+        projectId: $projectId,
+        channelId: $channelId,
+        filter: $filter,
+        option:$option,
+        sort:$sort
+    ) {
+        totalCount
+        edges {
+            node {
+                id
+                project_id
+                channel_id
+                pinned
+                pinnedAt
+                user_id {
+                    id
+                    name
+                    profile
+                }
+                expiredAt
+                createdAt
+            }
+        }
+    }
+}
+
+mutation createPin (
+    $projectId: String!,
+    $channelId: String!,
+    $pinned: Boolean!,
+    $pinnedAt: String,
+    $expiredAt: String
+) {
+    createPin (
+        input: {
+            projectId: $projectId,
+            channelId: $channelId,
+            pinned: $pinned,
+            pinnedAt: $pinnedAt,
+            expiredAt: $expiredAt
+        }
+    ) {
+        pin {
+            id
+            project_id
+            channel_id
+            pinned
+            pinnedAt
+            user_id {
+                id
+                name
+                profile
+            }
+            expiredAt
+            createdAt
+        }
+    }
+}
+
+mutation updatePin (
+    $id: ID!,
+    $projectId: String!,
+    $channelId: String!,
+    $pinned: Boolean!,
+    $pinnedAt: String,
+    $expiredAt: String
+) {
+    updatePin (
+        input: {
+            id: $id,
+            projectId: $projectId,
+            channelId: $channelId,
+            pinned: $pinned,
+            pinnedAt: $pinnedAt,
+            expiredAt: $expiredAt
+        }
+    ) {
+        pin {
+            id
+            project_id
+            channel_id
+            pinned
+            pinnedAt
+            user_id {
+                id
+                name
+                profile
+            }
+            expiredAt
+            createdAt
+        }
+    }
+}
+

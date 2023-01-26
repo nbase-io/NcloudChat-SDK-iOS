@@ -1,0 +1,6 @@
+query project($id: ID!) {
+    project(id:$id) {
+        ncp_project_id
+        name
+    }
+}
