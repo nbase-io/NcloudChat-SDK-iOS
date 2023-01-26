@@ -16,10 +16,9 @@ Ncloud Chat iOS SDK를 설치한 후, Ncloud Chat 대시보드와 연동하고 �
 Swift package 셋업을 마친 뒤, NcloudChat를 dependency로 추가하기 위해, `Package.swift`에 `dependencies` 를 추가 합니다.
 ```swift
 dependencies: [
-    .package(url: "https://github.com/nbase-io/CloudChat-SDK-iOS.git")
+    .package(url: "https://github.com/nbase-io/NcloudChat-sdk-swift.git")
 ]
 ```
-
 ### **CocoaPods**
 CocoaPods가 익숙하지 않으시다면, [CocoaPods Getting Started Guide](https://guides.cocoapods.org/using/getting-started.html)를 참고 하세요. Xcode 프로젝트에 CocoaPods를 이용하여 NcloudChat를 통합시키려면, `Podfile`을  설정해 주세요:
 ```rb
