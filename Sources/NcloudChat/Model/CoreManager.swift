@@ -256,12 +256,10 @@ class CoreManager {
         }
         socket.on("user deleted") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onUserDeleted?(data: dataInfo)
         }
         socket.on("user updated") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onUserUpdated?(data: dataInfo)
         }
         socket.on("result") { dataArray, AckCallback in
@@ -271,7 +269,6 @@ class CoreManager {
             self.delegate?.onResult?(data: dataInfo)
         }
         socket.on(clientEvent: .error) { dataArray, AckCallback in
-            print("ERROR")
             self.delegate?.onError?(error: dataArray)
             for dataInfo in dataArray {
                 guard let dataString = dataInfo as? String, let data = dataString.data(using: .utf8) else { return }
