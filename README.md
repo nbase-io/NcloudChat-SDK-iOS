@@ -4,7 +4,7 @@ iOS용 채팅 개발을 위한 Ncloud Chat iOS SDK 사용법에 대해 설명합
 
 ## **요구사항**
 iOS용 Ncloud Chat SDK를 사용하기 위한 요구 사양은 다음과 같습니다.
-- iOS 16.2 이상 설치된 실행 가능한 기기
+- iOS 12.0 이상 설치된 실행 가능한 기기
 - Swift 5.0 and later
 - Xcode 13 이상
 
@@ -846,7 +846,7 @@ nc.deleteFriendship(friendId: FRIEND_ID) {
 현재 모든 상태의 친구 목록을 가져 옵니다. offset, limit에 따라 수 많은 사용자를 가져올 수 있습니다.
 ```swift
 nc.getFriendships(
-    filter: ["status": "accepted"], 
+    filter: ["status": "accepted"], // accepted, pending, rejected 값을 필터로 지정합니다.
     sort: ["created_at": -1],
     option: ["offset": 0, "limit": 100]
     ) {
