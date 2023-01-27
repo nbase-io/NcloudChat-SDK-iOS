@@ -91,6 +91,10 @@ extension CloudChat {
             completionHandler(.failure(.noMimeType))
             return
         }
+        guard mimeType == "image/bmp" || mimeType == "image/gif" || mimeType == "image/jpeg" || mimeType == "image/png" || mimeType == "image/webp" || mimeType == "image/heic" || mimeType == "image/heic-sequence" || mimeType == "image/heif" || mimeType == "image/heif-sequence" || mimeType == "image/svg+xml"  else {
+            completionHandler(.failure(.failed(message: "Unsupported mime type, supported types are: image/bmp, image/gif, image/jpeg, image/png, image/webp, image/heic, image/heic-sequence, image/heif, image/heif-sequence, image/svg+xml.")))
+            return
+        }
         
         CoreManager.shared.upload(channelId: channelId, file: file, fileName: fileName, mimeType: mimeType) { result in
             switch result {
