@@ -4,7 +4,7 @@ iOS용 채팅 개발을 위한 Ncloud Chat iOS SDK 사용법에 대해 설명합
 
 ## **요구사항**
 iOS용 Ncloud Chat SDK를 사용하기 위한 요구 사양은 다음과 같습니다.
-- iOS 12.0 이상 설치된 실행 가능한 기기
+- iOS 13.0 이상 설치된 실행 가능한 기기
 - Swift 5.0 and later
 - Xcode 13 이상
 
