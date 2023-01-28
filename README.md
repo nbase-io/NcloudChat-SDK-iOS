@@ -19,16 +19,6 @@ dependencies: [
     .package(url: "https://github.com/nbase-io/NcloudChat-SDK-iOS.git")
 ]
 ```
-### **CocoaPods**
-CocoaPods가 익숙하지 않으시다면, [CocoaPods Getting Started Guide](https://guides.cocoapods.org/using/getting-started.html)를 참고 하세요. Xcode 프로젝트에 CocoaPods를 이용하여 NcloudChat를 통합시키려면, `Podfile`을  설정해 주세요:
-```rb
-pod 'NcloudChat'
-```
-### **Carthage**
-[Carthage](https://github.com/Carthage/Carthage) is a decentralized dependency manager that builds your dependencies and provides you with binary frameworks. To integrate NcloudChat into your Xcode project using Carthage, specify it in your `Cartfile`:
-```
-github "nbase-io/cloudchat-sdk-ios"
-```
 
 ---
 ## **1. 초기화와 이벤트**
