@@ -1,5 +1,5 @@
-query project($id: ID!) {
-    project(id:$id) {
+query project($id: ID!, $ncpId: String!) {
+    project(id:$id, ncpId: $ncpId) {
         ncp_project_id
         name
     }

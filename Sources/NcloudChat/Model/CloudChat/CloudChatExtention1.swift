@@ -299,8 +299,8 @@ extension CloudChat {
                     return
                 }
                 data.id = data.id.toDecodedId()
-                if let userId = data.userId?.id {
-                    data.userId?.id = userId.toDecodedId()
+                if let userId = data.user?.id {
+                    data.user?.id = userId.toDecodedId()
                 }
                 completionHandler(.success(data.resultMap.jsonValue))
             case .failure(let error):
@@ -328,9 +328,9 @@ extension CloudChat {
                     return
                 }
                 for i in 0..<channels.totalCount {
-                    if let node = channels.edges?[i]?.node, let userId = node.userId {
+                    if let node = channels.edges?[i]?.node, let user = node.user {
                         channels.edges?[i]?.node?.id = node.id.toDecodedId()
-                        channels.edges?[i]?.node?.userId?.id = userId.id.toDecodedId()
+                        channels.edges?[i]?.node?.user?.id = user.id.toDecodedId()
                     }
                 }
                 completionHandler(.success(channels.resultMap.jsonValue))
@@ -359,7 +359,7 @@ extension CloudChat {
             return
         }
         
-        CoreManager.shared.apollo.perform(mutation: CreateChannelMutation(projectId: projectId, name: channelName, type: channelType.uppercased(), uniqueId: uniqueId, members: members, customField: customField, disabled: disabled, mutes: mutes, push: push, imageUrl: imageUrl, id: id, translation: translation)) {
+        CoreManager.shared.apollo.perform(mutation: CreateChannelMutation(id: id, projectId: projectId, name: channelName, type: channelType.uppercased(), uniqueId: uniqueId, translation: translation, push: push, mutes: mutes, linkUrl: "", imageUrl: imageUrl, customField: customField, members: members)) {
             result in
             switch result {
             case .success(let graphQLResult):
@@ -371,8 +371,8 @@ extension CloudChat {
                     return
                 }
                 data.id = data.id.toDecodedId()
-                if let userId = data.userId?.id {
-                    data.userId?.id = userId.toDecodedId()
+                if let userId = data.user?.id {
+                    data.user?.id = userId.toDecodedId()
                 }
                 completionHandler(.success(data.resultMap.jsonValue))
             case .failure(let error):
@@ -416,8 +416,8 @@ extension CloudChat {
                     return
                 }
                 data.id = data.id.toDecodedId()
-                if let userId = data.userId?.id {
-                    data.userId?.id = userId.toDecodedId()
+                if let userId = data.user?.id {
+                    data.user?.id = userId.toDecodedId()
                 }
                 completionHandler(.success(data.resultMap.jsonValue))
             case .failure(let error):
@@ -449,8 +449,8 @@ extension CloudChat {
                     return
                 }
                 data.id = data.id.toDecodedId()
-                if let userId = data.userId?.id {
-                    data.userId?.id = userId.toDecodedId()
+                if let userId = data.user?.id {
+                    data.user?.id = userId.toDecodedId()
                 }
                 completionHandler(.success(data.resultMap.jsonValue))
             case .failure(let error):

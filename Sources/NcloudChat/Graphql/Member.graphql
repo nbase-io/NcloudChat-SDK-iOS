@@ -88,6 +88,8 @@ mutation deleteMemberBlock (
     }
 }
 
+
+
 query membersForQuery (
     $projectId: String!,
     $option: String!,
@@ -115,16 +117,18 @@ mutation updateMember(
     $projectId: String!
     $name: String
     $profile: String
+    $remoteip: String
+    $memo: String
     $adid: String
     $device: String
-    $push:Boolean
+    $deviceType: [String]
     $network: String
     $version: String
     $model: String
     $notications: NoticationInput
   )
  {
-    updateMember(input: {id: $id, projectId: $projectId, profile: $profile, name: $name, adid: $adid, device: $device, push:$push, network: $network, version: $version, model: $model, notications: $notications}) {
+    updateMember(input: {id: $id, projectId: $projectId, profile: $profile, memo: $memo, name: $name, remoteip: $remoteip, adid: $adid, device: $device, deviceType: $deviceType, network: $network, version: $version, model: $model, notications: $notications}) {
         member {
             id
             project_id

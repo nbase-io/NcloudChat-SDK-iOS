@@ -86,13 +86,14 @@ public final class ChannelQuery: GraphQLQuery {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
     """
-    query channel($id: String, $projectId: String!, $uniqueId: String) {
-      channel(projectId: $projectId, id: $id, uniqueId: $uniqueId) {
+    query channel($id: String, $projectId: String!) {
+      channel(projectId: $projectId, id: $id) {
         __typename
         id
         project_id
         name
-        user_id {
+        user_id
+        user {
           __typename
           id
           name
@@ -142,16 +143,14 @@ public final class ChannelQuery: GraphQLQuery {
 
   public var id: String?
   public var projectId: String
-  public var uniqueId: String?
 
-  public init(id: String? = nil, projectId: String, uniqueId: String? = nil) {
+  public init(id: String? = nil, projectId: String) {
     self.id = id
     self.projectId = projectId
-    self.uniqueId = uniqueId
   }
 
   public var variables: GraphQLMap? {
-    return ["id": id, "projectId": projectId, "uniqueId": uniqueId]
+    return ["id": id, "projectId": projectId]
   }
 
   public struct Data: GraphQLSelectionSet {
@@ -159,7 +158,7 @@ public final class ChannelQuery: GraphQLQuery {
 
     public static var selections: [GraphQLSelection] {
       return [
-        GraphQLField("channel", arguments: ["projectId": GraphQLVariable("projectId"), "id": GraphQLVariable("id"), "uniqueId": GraphQLVariable("uniqueId")], type: .object(Channel.selections)),
+        GraphQLField("channel", arguments: ["projectId": GraphQLVariable("projectId"), "id": GraphQLVariable("id")], type: .object(Channel.selections)),
       ]
     }
 
@@ -191,7 +190,8 @@ public final class ChannelQuery: GraphQLQuery {
           GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
           GraphQLField("project_id", type: .scalar(String.self)),
           GraphQLField("name", type: .scalar(String.self)),
-          GraphQLField("user_id", type: .object(UserId.selections)),
+          GraphQLField("user_id", type: .scalar(String.self)),
+          GraphQLField("user", type: .object(User.selections)),
           GraphQLField("unique_id", type: .scalar(String.self)),
           GraphQLField("type", type: .scalar(String.self)),
           GraphQLField("translation", type: .scalar(Bool.self)),
@@ -211,8 +211,8 @@ public final class ChannelQuery: GraphQLQuery {
         self.resultMap = unsafeResultMap
       }
 
-      public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: UserId? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
-        self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
+      public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: String? = nil, user: User? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
+        self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
       }
 
       public var __typename: String {
@@ -252,12 +252,21 @@ public final class ChannelQuery: GraphQLQuery {
         }
       }
 
-      public var userId: UserId? {
+      public var userId: String? {
         get {
-          return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+          return resultMap["user_id"] as? String
         }
         set {
-          resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+          resultMap.updateValue(newValue, forKey: "user_id")
+        }
+      }
+
+      public var user: User? {
+        get {
+          return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+        }
+        set {
+          resultMap.updateValue(newValue?.resultMap, forKey: "user")
         }
       }
 
@@ -351,7 +360,7 @@ public final class ChannelQuery: GraphQLQuery {
         }
       }
 
-      public struct UserId: GraphQLSelectionSet {
+      public struct User: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Members"]
 
         public static var selections: [GraphQLSelection] {
@@ -717,7 +726,8 @@ public final class ChannelsQuery: GraphQLQuery {
             id
             project_id
             name
-            user_id {
+            user_id
+            user {
               __typename
               id
               name
@@ -908,7 +918,8 @@ public final class ChannelsQuery: GraphQLQuery {
               GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
               GraphQLField("project_id", type: .scalar(String.self)),
               GraphQLField("name", type: .scalar(String.self)),
-              GraphQLField("user_id", type: .object(UserId.selections)),
+              GraphQLField("user_id", type: .scalar(String.self)),
+              GraphQLField("user", type: .object(User.selections)),
               GraphQLField("unique_id", type: .scalar(String.self)),
               GraphQLField("type", type: .scalar(String.self)),
               GraphQLField("translation", type: .scalar(Bool.self)),
@@ -928,8 +939,8 @@ public final class ChannelsQuery: GraphQLQuery {
             self.resultMap = unsafeResultMap
           }
 
-          public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: UserId? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
-            self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
+          public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: String? = nil, user: User? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
           }
 
           public var __typename: String {
@@ -969,12 +980,21 @@ public final class ChannelsQuery: GraphQLQuery {
             }
           }
 
-          public var userId: UserId? {
+          public var userId: String? {
             get {
-              return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+              return resultMap["user_id"] as? String
             }
             set {
-              resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+              resultMap.updateValue(newValue, forKey: "user_id")
+            }
+          }
+
+          public var user: User? {
+            get {
+              return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "user")
             }
           }
 
@@ -1068,7 +1088,7 @@ public final class ChannelsQuery: GraphQLQuery {
             }
           }
 
-          public struct UserId: GraphQLSelectionSet {
+          public struct User: GraphQLSelectionSet {
             public static let possibleTypes: [String] = ["Members"]
 
             public static var selections: [GraphQLSelection] {
@@ -1425,9 +1445,9 @@ public final class CreateChannelMutation: GraphQLMutation {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
     """
-    mutation createChannel($projectId: String!, $name: String!, $type: String!, $uniqueId: String, $members: [String], $customField: String, $disabled: Boolean, $mutes: Boolean, $push: Boolean, $imageUrl: String, $id: String, $translation: Boolean) {
+    mutation createChannel($id: String, $projectId: String!, $name: String!, $type: String!, $uniqueId: String, $translation: Boolean, $push: Boolean, $mutes: Boolean, $linkUrl: String, $imageUrl: String, $customField: String, $members: [String]) {
       createChannel(
-        input: {projectId: $projectId, name: $name, type: $type, members: $members, uniqueId: $uniqueId, customField: $customField, disabled: $disabled, mutes: $mutes, push: $push, imageUrl: $imageUrl, id: $id, translation: $translation}
+        input: {id: $id, projectId: $projectId, name: $name, type: $type, uniqueId: $uniqueId, translation: $translation, push: $push, mutes: $mutes, customField: $customField, linkUrl: $linkUrl, imageUrl: $imageUrl, members: $members}
       ) {
         __typename
         channel {
@@ -1435,7 +1455,8 @@ public final class CreateChannelMutation: GraphQLMutation {
           id
           project_id
           name
-          user_id {
+          user_id
+          user {
             __typename
             id
             name
@@ -1484,36 +1505,36 @@ public final class CreateChannelMutation: GraphQLMutation {
 
   public let operationName: String = "createChannel"
 
+  public var id: String?
   public var projectId: String
   public var name: String
   public var type: String
   public var uniqueId: String?
-  public var members: [String?]?
-  public var customField: String?
-  public var disabled: Bool?
-  public var mutes: Bool?
-  public var push: Bool?
-  public var imageUrl: String?
-  public var id: String?
   public var translation: Bool?
+  public var push: Bool?
+  public var mutes: Bool?
+  public var linkUrl: String?
+  public var imageUrl: String?
+  public var customField: String?
+  public var members: [String?]?
 
-  public init(projectId: String, name: String, type: String, uniqueId: String? = nil, members: [String?]? = nil, customField: String? = nil, disabled: Bool? = nil, mutes: Bool? = nil, push: Bool? = nil, imageUrl: String? = nil, id: String? = nil, translation: Bool? = nil) {
+  public init(id: String? = nil, projectId: String, name: String, type: String, uniqueId: String? = nil, translation: Bool? = nil, push: Bool? = nil, mutes: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, customField: String? = nil, members: [String?]? = nil) {
+    self.id = id
     self.projectId = projectId
     self.name = name
     self.type = type
     self.uniqueId = uniqueId
-    self.members = members
-    self.customField = customField
-    self.disabled = disabled
-    self.mutes = mutes
-    self.push = push
-    self.imageUrl = imageUrl
-    self.id = id
     self.translation = translation
+    self.push = push
+    self.mutes = mutes
+    self.linkUrl = linkUrl
+    self.imageUrl = imageUrl
+    self.customField = customField
+    self.members = members
   }
 
   public var variables: GraphQLMap? {
-    return ["projectId": projectId, "name": name, "type": type, "uniqueId": uniqueId, "members": members, "customField": customField, "disabled": disabled, "mutes": mutes, "push": push, "imageUrl": imageUrl, "id": id, "translation": translation]
+    return ["id": id, "projectId": projectId, "name": name, "type": type, "uniqueId": uniqueId, "translation": translation, "push": push, "mutes": mutes, "linkUrl": linkUrl, "imageUrl": imageUrl, "customField": customField, "members": members]
   }
 
   public struct Data: GraphQLSelectionSet {
@@ -1521,7 +1542,7 @@ public final class CreateChannelMutation: GraphQLMutation {
 
     public static var selections: [GraphQLSelection] {
       return [
-        GraphQLField("createChannel", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "name": GraphQLVariable("name"), "type": GraphQLVariable("type"), "members": GraphQLVariable("members"), "uniqueId": GraphQLVariable("uniqueId"), "customField": GraphQLVariable("customField"), "disabled": GraphQLVariable("disabled"), "mutes": GraphQLVariable("mutes"), "push": GraphQLVariable("push"), "imageUrl": GraphQLVariable("imageUrl"), "id": GraphQLVariable("id"), "translation": GraphQLVariable("translation")]], type: .object(CreateChannel.selections)),
+        GraphQLField("createChannel", arguments: ["input": ["id": GraphQLVariable("id"), "projectId": GraphQLVariable("projectId"), "name": GraphQLVariable("name"), "type": GraphQLVariable("type"), "uniqueId": GraphQLVariable("uniqueId"), "translation": GraphQLVariable("translation"), "push": GraphQLVariable("push"), "mutes": GraphQLVariable("mutes"), "customField": GraphQLVariable("customField"), "linkUrl": GraphQLVariable("linkUrl"), "imageUrl": GraphQLVariable("imageUrl"), "members": GraphQLVariable("members")]], type: .object(CreateChannel.selections)),
       ]
     }
 
@@ -1592,7 +1613,8 @@ public final class CreateChannelMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("project_id", type: .scalar(String.self)),
             GraphQLField("name", type: .scalar(String.self)),
-            GraphQLField("user_id", type: .object(UserId.selections)),
+            GraphQLField("user_id", type: .scalar(String.self)),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("unique_id", type: .scalar(String.self)),
             GraphQLField("type", type: .scalar(String.self)),
             GraphQLField("translation", type: .scalar(Bool.self)),
@@ -1612,8 +1634,8 @@ public final class CreateChannelMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: UserId? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
+        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: String? = nil, user: User? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
         }
 
         public var __typename: String {
@@ -1653,12 +1675,21 @@ public final class CreateChannelMutation: GraphQLMutation {
           }
         }
 
-        public var userId: UserId? {
+        public var userId: String? {
           get {
-            return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+            return resultMap["user_id"] as? String
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+            resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -1752,7 +1783,7 @@ public final class CreateChannelMutation: GraphQLMutation {
           }
         }
 
-        public struct UserId: GraphQLSelectionSet {
+        public struct User: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Members"]
 
           public static var selections: [GraphQLSelection] {
@@ -2108,9 +2139,9 @@ public final class UpdateChannelMutation: GraphQLMutation {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
     """
-    mutation updateChannel($projectId: String!, $name: String, $type: String, $uniqueId: String, $translation: Boolean, $push: Boolean, $imageUrl: String, $id: ID!, $members: [String]) {
+    mutation updateChannel($projectId: String!, $name: String, $type: String, $uniqueId: String, $translation: Boolean, $push: Boolean, $linkUrl: String, $imageUrl: String, $customField: String, $id: ID!, $members: [String]) {
       updateChannel(
-        input: {projectId: $projectId, name: $name, type: $type, id: $id, members: $members, uniqueId: $uniqueId, translation: $translation, push: $push, imageUrl: $imageUrl}
+        input: {projectId: $projectId, name: $name, type: $type, id: $id, members: $members, uniqueId: $uniqueId, translation: $translation, push: $push, customField: $customField, linkUrl: $linkUrl, imageUrl: $imageUrl}
       ) {
         __typename
         channel {
@@ -2118,7 +2149,8 @@ public final class UpdateChannelMutation: GraphQLMutation {
           id
           project_id
           name
-          user_id {
+          user_id
+          user {
             __typename
             id
             name
@@ -2173,24 +2205,28 @@ public final class UpdateChannelMutation: GraphQLMutation {
   public var uniqueId: String?
   public var translation: Bool?
   public var push: Bool?
+  public var linkUrl: String?
   public var imageUrl: String?
+  public var customField: String?
   public var id: GraphQLID
   public var members: [String?]?
 
-  public init(projectId: String, name: String? = nil, type: String? = nil, uniqueId: String? = nil, translation: Bool? = nil, push: Bool? = nil, imageUrl: String? = nil, id: GraphQLID, members: [String?]? = nil) {
+  public init(projectId: String, name: String? = nil, type: String? = nil, uniqueId: String? = nil, translation: Bool? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, customField: String? = nil, id: GraphQLID, members: [String?]? = nil) {
     self.projectId = projectId
     self.name = name
     self.type = type
     self.uniqueId = uniqueId
     self.translation = translation
     self.push = push
+    self.linkUrl = linkUrl
     self.imageUrl = imageUrl
+    self.customField = customField
     self.id = id
     self.members = members
   }
 
   public var variables: GraphQLMap? {
-    return ["projectId": projectId, "name": name, "type": type, "uniqueId": uniqueId, "translation": translation, "push": push, "imageUrl": imageUrl, "id": id, "members": members]
+    return ["projectId": projectId, "name": name, "type": type, "uniqueId": uniqueId, "translation": translation, "push": push, "linkUrl": linkUrl, "imageUrl": imageUrl, "customField": customField, "id": id, "members": members]
   }
 
   public struct Data: GraphQLSelectionSet {
@@ -2198,7 +2234,7 @@ public final class UpdateChannelMutation: GraphQLMutation {
 
     public static var selections: [GraphQLSelection] {
       return [
-        GraphQLField("updateChannel", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "name": GraphQLVariable("name"), "type": GraphQLVariable("type"), "id": GraphQLVariable("id"), "members": GraphQLVariable("members"), "uniqueId": GraphQLVariable("uniqueId"), "translation": GraphQLVariable("translation"), "push": GraphQLVariable("push"), "imageUrl": GraphQLVariable("imageUrl")]], type: .object(UpdateChannel.selections)),
+        GraphQLField("updateChannel", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "name": GraphQLVariable("name"), "type": GraphQLVariable("type"), "id": GraphQLVariable("id"), "members": GraphQLVariable("members"), "uniqueId": GraphQLVariable("uniqueId"), "translation": GraphQLVariable("translation"), "push": GraphQLVariable("push"), "customField": GraphQLVariable("customField"), "linkUrl": GraphQLVariable("linkUrl"), "imageUrl": GraphQLVariable("imageUrl")]], type: .object(UpdateChannel.selections)),
       ]
     }
 
@@ -2269,7 +2305,8 @@ public final class UpdateChannelMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("project_id", type: .scalar(String.self)),
             GraphQLField("name", type: .scalar(String.self)),
-            GraphQLField("user_id", type: .object(UserId.selections)),
+            GraphQLField("user_id", type: .scalar(String.self)),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("unique_id", type: .scalar(String.self)),
             GraphQLField("type", type: .scalar(String.self)),
             GraphQLField("translation", type: .scalar(Bool.self)),
@@ -2289,8 +2326,8 @@ public final class UpdateChannelMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: UserId? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
+        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: String? = nil, user: User? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
         }
 
         public var __typename: String {
@@ -2330,12 +2367,21 @@ public final class UpdateChannelMutation: GraphQLMutation {
           }
         }
 
-        public var userId: UserId? {
+        public var userId: String? {
           get {
-            return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+            return resultMap["user_id"] as? String
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+            resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -2429,7 +2475,7 @@ public final class UpdateChannelMutation: GraphQLMutation {
           }
         }
 
-        public struct UserId: GraphQLSelectionSet {
+        public struct User: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Members"]
 
           public static var selections: [GraphQLSelection] {
@@ -2793,7 +2839,8 @@ public final class DeleteChannelMutation: GraphQLMutation {
           id
           project_id
           name
-          user_id {
+          user_id
+          user {
             __typename
             id
             name
@@ -2930,7 +2977,8 @@ public final class DeleteChannelMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("project_id", type: .scalar(String.self)),
             GraphQLField("name", type: .scalar(String.self)),
-            GraphQLField("user_id", type: .object(UserId.selections)),
+            GraphQLField("user_id", type: .scalar(String.self)),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("unique_id", type: .scalar(String.self)),
             GraphQLField("type", type: .scalar(String.self)),
             GraphQLField("translation", type: .scalar(Bool.self)),
@@ -2950,8 +2998,8 @@ public final class DeleteChannelMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: UserId? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
+        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: String? = nil, user: User? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil, lastMessage: LastMessage? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt, "last_message": lastMessage.flatMap { (value: LastMessage) -> ResultMap in value.resultMap }])
         }
 
         public var __typename: String {
@@ -2991,12 +3039,21 @@ public final class DeleteChannelMutation: GraphQLMutation {
           }
         }
 
-        public var userId: UserId? {
+        public var userId: String? {
           get {
-            return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+            return resultMap["user_id"] as? String
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+            resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -3090,7 +3147,7 @@ public final class DeleteChannelMutation: GraphQLMutation {
           }
         }
 
-        public struct UserId: GraphQLSelectionSet {
+        public struct User: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Members"]
 
           public static var selections: [GraphQLSelection] {
@@ -3456,7 +3513,8 @@ public final class AddChannelMembersMutation: GraphQLMutation {
           id
           project_id
           name
-          user_id {
+          user_id
+          user {
             __typename
             id
             name
@@ -3569,7 +3627,8 @@ public final class AddChannelMembersMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("project_id", type: .scalar(String.self)),
             GraphQLField("name", type: .scalar(String.self)),
-            GraphQLField("user_id", type: .object(UserId.selections)),
+            GraphQLField("user_id", type: .scalar(String.self)),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("unique_id", type: .scalar(String.self)),
             GraphQLField("type", type: .scalar(String.self)),
             GraphQLField("translation", type: .scalar(Bool.self)),
@@ -3588,8 +3647,8 @@ public final class AddChannelMembersMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: UserId? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt])
+        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: String? = nil, user: User? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt])
         }
 
         public var __typename: String {
@@ -3629,12 +3688,21 @@ public final class AddChannelMembersMutation: GraphQLMutation {
           }
         }
 
-        public var userId: UserId? {
+        public var userId: String? {
           get {
-            return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+            return resultMap["user_id"] as? String
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+            resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -3719,7 +3787,7 @@ public final class AddChannelMembersMutation: GraphQLMutation {
           }
         }
 
-        public struct UserId: GraphQLSelectionSet {
+        public struct User: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Members"]
 
           public static var selections: [GraphQLSelection] {
@@ -3818,7 +3886,8 @@ public final class RemoveChannelMembersMutation: GraphQLMutation {
           id
           project_id
           name
-          user_id {
+          user_id
+          user {
             __typename
             id
             name
@@ -3931,7 +4000,8 @@ public final class RemoveChannelMembersMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("project_id", type: .scalar(String.self)),
             GraphQLField("name", type: .scalar(String.self)),
-            GraphQLField("user_id", type: .object(UserId.selections)),
+            GraphQLField("user_id", type: .scalar(String.self)),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("unique_id", type: .scalar(String.self)),
             GraphQLField("type", type: .scalar(String.self)),
             GraphQLField("translation", type: .scalar(Bool.self)),
@@ -3950,8 +4020,8 @@ public final class RemoveChannelMembersMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: UserId? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt])
+        public init(id: GraphQLID, projectId: String? = nil, name: String? = nil, userId: String? = nil, user: User? = nil, uniqueId: String? = nil, type: String? = nil, translation: Bool? = nil, members: [String?]? = nil, push: Bool? = nil, linkUrl: String? = nil, imageUrl: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Channels", "id": id, "project_id": projectId, "name": name, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "unique_id": uniqueId, "type": type, "translation": translation, "members": members, "push": push, "link_url": linkUrl, "image_url": imageUrl, "created_at": createdAt, "updated_at": updatedAt])
         }
 
         public var __typename: String {
@@ -3991,12 +4061,21 @@ public final class RemoveChannelMembersMutation: GraphQLMutation {
           }
         }
 
-        public var userId: UserId? {
+        public var userId: String? {
           get {
-            return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+            return resultMap["user_id"] as? String
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+            resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -4081,7 +4160,7 @@ public final class RemoveChannelMembersMutation: GraphQLMutation {
           }
         }
 
-        public struct UserId: GraphQLSelectionSet {
+        public struct User: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Members"]
 
           public static var selections: [GraphQLSelection] {
@@ -7017,9 +7096,9 @@ public final class UpdateMemberMutation: GraphQLMutation {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
     """
-    mutation updateMember($id: String!, $projectId: String!, $name: String, $profile: String, $adid: String, $device: String, $push: Boolean, $network: String, $version: String, $model: String, $notications: NoticationInput) {
+    mutation updateMember($id: String!, $projectId: String!, $name: String, $profile: String, $remoteip: String, $memo: String, $adid: String, $device: String, $deviceType: [String], $network: String, $version: String, $model: String, $notications: NoticationInput) {
       updateMember(
-        input: {id: $id, projectId: $projectId, profile: $profile, name: $name, adid: $adid, device: $device, push: $push, network: $network, version: $version, model: $model, notications: $notications}
+        input: {id: $id, projectId: $projectId, profile: $profile, memo: $memo, name: $name, remoteip: $remoteip, adid: $adid, device: $device, deviceType: $deviceType, network: $network, version: $version, model: $model, notications: $notications}
       ) {
         __typename
         member {
@@ -7057,22 +7136,26 @@ public final class UpdateMemberMutation: GraphQLMutation {
   public var projectId: String
   public var name: String?
   public var profile: String?
+  public var remoteip: String?
+  public var memo: String?
   public var adid: String?
   public var device: String?
-  public var push: Bool?
+  public var deviceType: [String?]?
   public var network: String?
   public var version: String?
   public var model: String?
   public var notications: NoticationInput?
 
-  public init(id: String, projectId: String, name: String? = nil, profile: String? = nil, adid: String? = nil, device: String? = nil, push: Bool? = nil, network: String? = nil, version: String? = nil, model: String? = nil, notications: NoticationInput? = nil) {
+  public init(id: String, projectId: String, name: String? = nil, profile: String? = nil, remoteip: String? = nil, memo: String? = nil, adid: String? = nil, device: String? = nil, deviceType: [String?]? = nil, network: String? = nil, version: String? = nil, model: String? = nil, notications: NoticationInput? = nil) {
     self.id = id
     self.projectId = projectId
     self.name = name
     self.profile = profile
+    self.remoteip = remoteip
+    self.memo = memo
     self.adid = adid
     self.device = device
-    self.push = push
+    self.deviceType = deviceType
     self.network = network
     self.version = version
     self.model = model
@@ -7080,7 +7163,7 @@ public final class UpdateMemberMutation: GraphQLMutation {
   }
 
   public var variables: GraphQLMap? {
-    return ["id": id, "projectId": projectId, "name": name, "profile": profile, "adid": adid, "device": device, "push": push, "network": network, "version": version, "model": model, "notications": notications]
+    return ["id": id, "projectId": projectId, "name": name, "profile": profile, "remoteip": remoteip, "memo": memo, "adid": adid, "device": device, "deviceType": deviceType, "network": network, "version": version, "model": model, "notications": notications]
   }
 
   public struct Data: GraphQLSelectionSet {
@@ -7088,7 +7171,7 @@ public final class UpdateMemberMutation: GraphQLMutation {
 
     public static var selections: [GraphQLSelection] {
       return [
-        GraphQLField("updateMember", arguments: ["input": ["id": GraphQLVariable("id"), "projectId": GraphQLVariable("projectId"), "profile": GraphQLVariable("profile"), "name": GraphQLVariable("name"), "adid": GraphQLVariable("adid"), "device": GraphQLVariable("device"), "push": GraphQLVariable("push"), "network": GraphQLVariable("network"), "version": GraphQLVariable("version"), "model": GraphQLVariable("model"), "notications": GraphQLVariable("notications")]], type: .object(UpdateMember.selections)),
+        GraphQLField("updateMember", arguments: ["input": ["id": GraphQLVariable("id"), "projectId": GraphQLVariable("projectId"), "profile": GraphQLVariable("profile"), "memo": GraphQLVariable("memo"), "name": GraphQLVariable("name"), "remoteip": GraphQLVariable("remoteip"), "adid": GraphQLVariable("adid"), "device": GraphQLVariable("device"), "deviceType": GraphQLVariable("deviceType"), "network": GraphQLVariable("network"), "version": GraphQLVariable("version"), "model": GraphQLVariable("model"), "notications": GraphQLVariable("notications")]], type: .object(UpdateMember.selections)),
       ]
     }
 
@@ -7435,8 +7518,61 @@ public final class MessageQuery: GraphQLQuery {
           __typename
           id
           name
+          profile
         }
+        attachment_filenames {
+          __typename
+          name
+          size
+          type
+          url
+        }
+        has
+        embed_providers
+        embed_type
+        parent_message_id
+        parent_message {
+          __typename
+          id
+          message_id
+          channel_id
+          sort_id
+          message_type
+          sender {
+            __typename
+            id
+            name
+            profile
+          }
+          admin {
+            __typename
+            id
+            name
+            profile
+          }
+          attachment_filenames {
+            __typename
+            name
+            size
+            type
+            url
+          }
+          has
+          embed_providers
+          embed_type
+          isExpress
+          link_hostnames
+          mentions
+          bytes
+          mentions_everyone
+          content
+          sended_at
+          created_at
+        }
+        isExpress
+        link_hostnames
         mentions
+        bytes
         mentions_everyone
         content
         sended_at
@@ -7502,7 +7638,16 @@ public final class MessageQuery: GraphQLQuery {
           GraphQLField("message_type", type: .scalar(String.self)),
           GraphQLField("sender", type: .object(Sender.selections)),
           GraphQLField("admin", type: .object(Admin.selections)),
+          GraphQLField("attachment_filenames", type: .object(AttachmentFilename.selections)),
+          GraphQLField("has", type: .scalar(String.self)),
+          GraphQLField("embed_providers", type: .scalar(String.self)),
+          GraphQLField("embed_type", type: .scalar(String.self)),
+          GraphQLField("parent_message_id", type: .scalar(String.self)),
+          GraphQLField("parent_message", type: .object(ParentMessage.selections)),
+          GraphQLField("isExpress", type: .scalar(Bool.self)),
+          GraphQLField("link_hostnames", type: .scalar(String.self)),
           GraphQLField("mentions", type: .list(.scalar(String.self))),
+          GraphQLField("bytes", type: .scalar(Int.self)),
           GraphQLField("mentions_everyone", type: .scalar(String.self)),
           GraphQLField("content", type: .scalar(String.self)),
           GraphQLField("sended_at", type: .scalar(String.self)),
@@ -7516,8 +7661,8 @@ public final class MessageQuery: GraphQLQuery {
         self.resultMap = unsafeResultMap
       }
 
-      public init(id: GraphQLID, messageId: String, channelId: String, sortId: String, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, mentions: [String?]? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
-        self.init(unsafeResultMap: ["__typename": "Messages", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "mentions": mentions, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+      public init(id: GraphQLID, messageId: String, channelId: String, sortId: String, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, parentMessageId: String? = nil, parentMessage: ParentMessage? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+        self.init(unsafeResultMap: ["__typename": "Messages", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "parent_message_id": parentMessageId, "parent_message": parentMessage.flatMap { (value: ParentMessage) -> ResultMap in value.resultMap }, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
       }
 
       public var __typename: String {
@@ -7593,12 +7738,93 @@ public final class MessageQuery: GraphQLQuery {
         }
       }
 
+      public var attachmentFilenames: AttachmentFilename? {
+        get {
+          return (resultMap["attachment_filenames"] as? ResultMap).flatMap { AttachmentFilename(unsafeResultMap: $0) }
+        }
+        set {
+          resultMap.updateValue(newValue?.resultMap, forKey: "attachment_filenames")
+        }
+      }
+
+      public var has: String? {
+        get {
+          return resultMap["has"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "has")
+        }
+      }
+
+      public var embedProviders: String? {
+        get {
+          return resultMap["embed_providers"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "embed_providers")
+        }
+      }
+
+      public var embedType: String? {
+        get {
+          return resultMap["embed_type"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "embed_type")
+        }
+      }
+
+      public var parentMessageId: String? {
+        get {
+          return resultMap["parent_message_id"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "parent_message_id")
+        }
+      }
+
+      public var parentMessage: ParentMessage? {
+        get {
+          return (resultMap["parent_message"] as? ResultMap).flatMap { ParentMessage(unsafeResultMap: $0) }
+        }
+        set {
+          resultMap.updateValue(newValue?.resultMap, forKey: "parent_message")
+        }
+      }
+
+      public var isExpress: Bool? {
+        get {
+          return resultMap["isExpress"] as? Bool
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "isExpress")
+        }
+      }
+
+      public var linkHostnames: String? {
+        get {
+          return resultMap["link_hostnames"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "link_hostnames")
+        }
+      }
+
       public var mentions: [String?]? {
         get {
           return resultMap["mentions"] as? [String?]
         }
         set {
           resultMap.updateValue(newValue, forKey: "mentions")
+        }
+      }
+
+      public var bytes: Int? {
+        get {
+          return resultMap["bytes"] as? Int
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "bytes")
         }
       }
 
@@ -7705,6 +7931,7 @@ public final class MessageQuery: GraphQLQuery {
             GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
             GraphQLField("id", type: .scalar(String.self)),
             GraphQLField("name", type: .scalar(String.self)),
+            GraphQLField("profile", type: .scalar(String.self)),
           ]
         }
 
@@ -7714,8 +7941,8 @@ public final class MessageQuery: GraphQLQuery {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: String? = nil, name: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name])
+        public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
         }
 
         public var __typename: String {
@@ -7744,152 +7971,27 @@ public final class MessageQuery: GraphQLQuery {
             resultMap.updateValue(newValue, forKey: "name")
           }
         }
-      }
-    }
-  }
-}
 
-public final class MessagesQuery: GraphQLQuery {
-  /// The raw GraphQL definition of this operation.
-  public let operationDefinition: String =
-    """
-    query messages($projectId: String!, $filter: String!, $option: String, $sort: String) {
-      messages(projectId: $projectId, filter: $filter, option: $option, sort: $sort) {
-        __typename
-        totalCount
-        edges {
-          __typename
-          node {
-            __typename
-            id
-            message_id
-            channel_id
-            sort_id
-            message_type
-            sender {
-              __typename
-              id
-              name
-              profile
-            }
-            admin {
-              __typename
-              id
-              name
-            }
-            mentions
-            mentions_everyone
-            content
-            sended_at
-            created_at
+        public var profile: String? {
+          get {
+            return resultMap["profile"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "profile")
           }
         }
       }
-    }
-    """
 
-  public let operationName: String = "messages"
-
-  public var projectId: String
-  public var filter: String
-  public var option: String?
-  public var sort: String?
-
-  public init(projectId: String, filter: String, option: String? = nil, sort: String? = nil) {
-    self.projectId = projectId
-    self.filter = filter
-    self.option = option
-    self.sort = sort
-  }
-
-  public var variables: GraphQLMap? {
-    return ["projectId": projectId, "filter": filter, "option": option, "sort": sort]
-  }
-
-  public struct Data: GraphQLSelectionSet {
-    public static let possibleTypes: [String] = ["Query"]
-
-    public static var selections: [GraphQLSelection] {
-      return [
-        GraphQLField("messages", arguments: ["projectId": GraphQLVariable("projectId"), "filter": GraphQLVariable("filter"), "option": GraphQLVariable("option"), "sort": GraphQLVariable("sort")], type: .object(Message.selections)),
-      ]
-    }
-
-    public private(set) var resultMap: ResultMap
-
-    public init(unsafeResultMap: ResultMap) {
-      self.resultMap = unsafeResultMap
-    }
-
-    public init(messages: Message? = nil) {
-      self.init(unsafeResultMap: ["__typename": "Query", "messages": messages.flatMap { (value: Message) -> ResultMap in value.resultMap }])
-    }
-
-    public var messages: Message? {
-      get {
-        return (resultMap["messages"] as? ResultMap).flatMap { Message(unsafeResultMap: $0) }
-      }
-      set {
-        resultMap.updateValue(newValue?.resultMap, forKey: "messages")
-      }
-    }
-
-    public struct Message: GraphQLSelectionSet {
-      public static let possibleTypes: [String] = ["MessagesConnection"]
-
-      public static var selections: [GraphQLSelection] {
-        return [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("totalCount", type: .nonNull(.scalar(Int.self))),
-          GraphQLField("edges", type: .list(.object(Edge.selections))),
-        ]
-      }
-
-      public private(set) var resultMap: ResultMap
-
-      public init(unsafeResultMap: ResultMap) {
-        self.resultMap = unsafeResultMap
-      }
-
-      public init(totalCount: Int, edges: [Edge?]? = nil) {
-        self.init(unsafeResultMap: ["__typename": "MessagesConnection", "totalCount": totalCount, "edges": edges.flatMap { (value: [Edge?]) -> [ResultMap?] in value.map { (value: Edge?) -> ResultMap? in value.flatMap { (value: Edge) -> ResultMap in value.resultMap } } }])
-      }
-
-      public var __typename: String {
-        get {
-          return resultMap["__typename"]! as! String
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "__typename")
-        }
-      }
-
-      public var totalCount: Int {
-        get {
-          return resultMap["totalCount"]! as! Int
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "totalCount")
-        }
-      }
-
-      /// A list of edges.
-      public var edges: [Edge?]? {
-        get {
-          return (resultMap["edges"] as? [ResultMap?]).flatMap { (value: [ResultMap?]) -> [Edge?] in value.map { (value: ResultMap?) -> Edge? in value.flatMap { (value: ResultMap) -> Edge in Edge(unsafeResultMap: value) } } }
-        }
-        set {
-          resultMap.updateValue(newValue.flatMap { (value: [Edge?]) -> [ResultMap?] in value.map { (value: Edge?) -> ResultMap? in value.flatMap { (value: Edge) -> ResultMap in value.resultMap } } }, forKey: "edges")
-        }
-      }
-
-      public struct Edge: GraphQLSelectionSet {
-        public static let possibleTypes: [String] = ["MessagesEdge"]
+      public struct AttachmentFilename: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["Attachment"]
 
         public static var selections: [GraphQLSelection] {
           return [
             GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("node", type: .object(Node.selections)),
+            GraphQLField("name", type: .scalar(String.self)),
+            GraphQLField("size", type: .scalar(Double.self)),
+            GraphQLField("type", type: .scalar(String.self)),
+            GraphQLField("url", type: .scalar(String.self)),
           ]
         }
 
@@ -7899,8 +8001,8 @@ public final class MessagesQuery: GraphQLQuery {
           self.resultMap = unsafeResultMap
         }
 
-        public init(node: Node? = nil) {
-          self.init(unsafeResultMap: ["__typename": "MessagesEdge", "node": node.flatMap { (value: Node) -> ResultMap in value.resultMap }])
+        public init(name: String? = nil, size: Double? = nil, type: String? = nil, url: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Attachment", "name": name, "size": size, "type": type, "url": url])
         }
 
         public var __typename: String {
@@ -7912,549 +8014,53 @@ public final class MessagesQuery: GraphQLQuery {
           }
         }
 
-        /// The item at the end of the edge
-        public var node: Node? {
+        public var name: String? {
           get {
-            return (resultMap["node"] as? ResultMap).flatMap { Node(unsafeResultMap: $0) }
+            return resultMap["name"] as? String
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "node")
+            resultMap.updateValue(newValue, forKey: "name")
           }
         }
 
-        public struct Node: GraphQLSelectionSet {
-          public static let possibleTypes: [String] = ["Messages"]
-
-          public static var selections: [GraphQLSelection] {
-            return [
-              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-              GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-              GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
-              GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
-              GraphQLField("sort_id", type: .nonNull(.scalar(String.self))),
-              GraphQLField("message_type", type: .scalar(String.self)),
-              GraphQLField("sender", type: .object(Sender.selections)),
-              GraphQLField("admin", type: .object(Admin.selections)),
-              GraphQLField("mentions", type: .list(.scalar(String.self))),
-              GraphQLField("mentions_everyone", type: .scalar(String.self)),
-              GraphQLField("content", type: .scalar(String.self)),
-              GraphQLField("sended_at", type: .scalar(String.self)),
-              GraphQLField("created_at", type: .scalar(String.self)),
-            ]
+        public var size: Double? {
+          get {
+            return resultMap["size"] as? Double
           }
-
-          public private(set) var resultMap: ResultMap
-
-          public init(unsafeResultMap: ResultMap) {
-            self.resultMap = unsafeResultMap
+          set {
+            resultMap.updateValue(newValue, forKey: "size")
           }
+        }
 
-          public init(id: GraphQLID, messageId: String, channelId: String, sortId: String, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, mentions: [String?]? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
-            self.init(unsafeResultMap: ["__typename": "Messages", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "mentions": mentions, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+        public var type: String? {
+          get {
+            return resultMap["type"] as? String
           }
-
-          public var __typename: String {
-            get {
-              return resultMap["__typename"]! as! String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "__typename")
-            }
+          set {
+            resultMap.updateValue(newValue, forKey: "type")
           }
+        }
 
-          /// The ID of an object
-          public var id: GraphQLID {
-            get {
-              return resultMap["id"]! as! GraphQLID
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "id")
-            }
+        public var url: String? {
+          get {
+            return resultMap["url"] as? String
           }
-
-          public var messageId: String {
-            get {
-              return resultMap["message_id"]! as! String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "message_id")
-            }
-          }
-
-          public var channelId: String {
-            get {
-              return resultMap["channel_id"]! as! String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "channel_id")
-            }
-          }
-
-          public var sortId: String {
-            get {
-              return resultMap["sort_id"]! as! String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "sort_id")
-            }
-          }
-
-          public var messageType: String? {
-            get {
-              return resultMap["message_type"] as? String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "message_type")
-            }
-          }
-
-          public var sender: Sender? {
-            get {
-              return (resultMap["sender"] as? ResultMap).flatMap { Sender(unsafeResultMap: $0) }
-            }
-            set {
-              resultMap.updateValue(newValue?.resultMap, forKey: "sender")
-            }
-          }
-
-          public var admin: Admin? {
-            get {
-              return (resultMap["admin"] as? ResultMap).flatMap { Admin(unsafeResultMap: $0) }
-            }
-            set {
-              resultMap.updateValue(newValue?.resultMap, forKey: "admin")
-            }
-          }
-
-          public var mentions: [String?]? {
-            get {
-              return resultMap["mentions"] as? [String?]
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "mentions")
-            }
-          }
-
-          public var mentionsEveryone: String? {
-            get {
-              return resultMap["mentions_everyone"] as? String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "mentions_everyone")
-            }
-          }
-
-          public var content: String? {
-            get {
-              return resultMap["content"] as? String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "content")
-            }
-          }
-
-          public var sendedAt: String? {
-            get {
-              return resultMap["sended_at"] as? String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "sended_at")
-            }
-          }
-
-          public var createdAt: String? {
-            get {
-              return resultMap["created_at"] as? String
-            }
-            set {
-              resultMap.updateValue(newValue, forKey: "created_at")
-            }
-          }
-
-          public struct Sender: GraphQLSelectionSet {
-            public static let possibleTypes: [String] = ["Sender"]
-
-            public static var selections: [GraphQLSelection] {
-              return [
-                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-                GraphQLField("id", type: .scalar(String.self)),
-                GraphQLField("name", type: .scalar(String.self)),
-                GraphQLField("profile", type: .scalar(String.self)),
-              ]
-            }
-
-            public private(set) var resultMap: ResultMap
-
-            public init(unsafeResultMap: ResultMap) {
-              self.resultMap = unsafeResultMap
-            }
-
-            public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
-              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
-            }
-
-            public var __typename: String {
-              get {
-                return resultMap["__typename"]! as! String
-              }
-              set {
-                resultMap.updateValue(newValue, forKey: "__typename")
-              }
-            }
-
-            public var id: String? {
-              get {
-                return resultMap["id"] as? String
-              }
-              set {
-                resultMap.updateValue(newValue, forKey: "id")
-              }
-            }
-
-            public var name: String? {
-              get {
-                return resultMap["name"] as? String
-              }
-              set {
-                resultMap.updateValue(newValue, forKey: "name")
-              }
-            }
-
-            public var profile: String? {
-              get {
-                return resultMap["profile"] as? String
-              }
-              set {
-                resultMap.updateValue(newValue, forKey: "profile")
-              }
-            }
-          }
-
-          public struct Admin: GraphQLSelectionSet {
-            public static let possibleTypes: [String] = ["Sender"]
-
-            public static var selections: [GraphQLSelection] {
-              return [
-                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-                GraphQLField("id", type: .scalar(String.self)),
-                GraphQLField("name", type: .scalar(String.self)),
-              ]
-            }
-
-            public private(set) var resultMap: ResultMap
-
-            public init(unsafeResultMap: ResultMap) {
-              self.resultMap = unsafeResultMap
-            }
-
-            public init(id: String? = nil, name: String? = nil) {
-              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name])
-            }
-
-            public var __typename: String {
-              get {
-                return resultMap["__typename"]! as! String
-              }
-              set {
-                resultMap.updateValue(newValue, forKey: "__typename")
-              }
-            }
-
-            public var id: String? {
-              get {
-                return resultMap["id"] as? String
-              }
-              set {
-                resultMap.updateValue(newValue, forKey: "id")
-              }
-            }
-
-            public var name: String? {
-              get {
-                return resultMap["name"] as? String
-              }
-              set {
-                resultMap.updateValue(newValue, forKey: "name")
-              }
-            }
+          set {
+            resultMap.updateValue(newValue, forKey: "url")
           }
         }
       }
-    }
-  }
-}
 
-public final class MarkQuery: GraphQLQuery {
-  /// The raw GraphQL definition of this operation.
-  public let operationDefinition: String =
-    """
-    query mark($projectId: String!, $channelId: String!) {
-      mark(projectId: $projectId, channelId: $channelId) {
-        __typename
-        user_id
-        message_id
-        sort_id
-        unread
-      }
-    }
-    """
-
-  public let operationName: String = "mark"
-
-  public var projectId: String
-  public var channelId: String
-
-  public init(projectId: String, channelId: String) {
-    self.projectId = projectId
-    self.channelId = channelId
-  }
-
-  public var variables: GraphQLMap? {
-    return ["projectId": projectId, "channelId": channelId]
-  }
-
-  public struct Data: GraphQLSelectionSet {
-    public static let possibleTypes: [String] = ["Query"]
-
-    public static var selections: [GraphQLSelection] {
-      return [
-        GraphQLField("mark", arguments: ["projectId": GraphQLVariable("projectId"), "channelId": GraphQLVariable("channelId")], type: .object(Mark.selections)),
-      ]
-    }
-
-    public private(set) var resultMap: ResultMap
-
-    public init(unsafeResultMap: ResultMap) {
-      self.resultMap = unsafeResultMap
-    }
-
-    public init(mark: Mark? = nil) {
-      self.init(unsafeResultMap: ["__typename": "Query", "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }])
-    }
-
-    public var mark: Mark? {
-      get {
-        return (resultMap["mark"] as? ResultMap).flatMap { Mark(unsafeResultMap: $0) }
-      }
-      set {
-        resultMap.updateValue(newValue?.resultMap, forKey: "mark")
-      }
-    }
-
-    public struct Mark: GraphQLSelectionSet {
-      public static let possibleTypes: [String] = ["Mark"]
-
-      public static var selections: [GraphQLSelection] {
-        return [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("user_id", type: .scalar(String.self)),
-          GraphQLField("message_id", type: .scalar(String.self)),
-          GraphQLField("sort_id", type: .scalar(String.self)),
-          GraphQLField("unread", type: .scalar(Int.self)),
-        ]
-      }
-
-      public private(set) var resultMap: ResultMap
-
-      public init(unsafeResultMap: ResultMap) {
-        self.resultMap = unsafeResultMap
-      }
-
-      public init(userId: String? = nil, messageId: String? = nil, sortId: String? = nil, unread: Int? = nil) {
-        self.init(unsafeResultMap: ["__typename": "Mark", "user_id": userId, "message_id": messageId, "sort_id": sortId, "unread": unread])
-      }
-
-      public var __typename: String {
-        get {
-          return resultMap["__typename"]! as! String
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "__typename")
-        }
-      }
-
-      public var userId: String? {
-        get {
-          return resultMap["user_id"] as? String
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "user_id")
-        }
-      }
-
-      public var messageId: String? {
-        get {
-          return resultMap["message_id"] as? String
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "message_id")
-        }
-      }
-
-      public var sortId: String? {
-        get {
-          return resultMap["sort_id"] as? String
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "sort_id")
-        }
-      }
-
-      public var unread: Int? {
-        get {
-          return resultMap["unread"] as? Int
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "unread")
-        }
-      }
-    }
-  }
-}
-
-public final class CreateChannelMessageMutation: GraphQLMutation {
-  /// The raw GraphQL definition of this operation.
-  public let operationDefinition: String =
-    """
-    mutation createChannelMessage($projectId: String!, $channelId: String!, $content: String!) {
-      createChannelMessage(
-        input: {projectId: $projectId, channelId: $channelId, content: $content}
-      ) {
-        __typename
-        message {
-          __typename
-          id
-          message_id
-          channel_id
-          sort_id
-          message_type
-          sender {
-            __typename
-            id
-            name
-            profile
-          }
-          admin {
-            __typename
-            id
-            name
-            profile
-          }
-          attachment_filenames {
-            __typename
-            name
-            size
-            type
-            url
-          }
-          has
-          embed_providers
-          embed_type
-          isExpress
-          link_hostnames
-          mentions
-          bytes
-          mentions_everyone
-          content
-          sended_at
-          created_at
-        }
-      }
-    }
-    """
-
-  public let operationName: String = "createChannelMessage"
-
-  public var projectId: String
-  public var channelId: String
-  public var content: String
-
-  public init(projectId: String, channelId: String, content: String) {
-    self.projectId = projectId
-    self.channelId = channelId
-    self.content = content
-  }
-
-  public var variables: GraphQLMap? {
-    return ["projectId": projectId, "channelId": channelId, "content": content]
-  }
-
-  public struct Data: GraphQLSelectionSet {
-    public static let possibleTypes: [String] = ["Mutation"]
-
-    public static var selections: [GraphQLSelection] {
-      return [
-        GraphQLField("createChannelMessage", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "channelId": GraphQLVariable("channelId"), "content": GraphQLVariable("content")]], type: .object(CreateChannelMessage.selections)),
-      ]
-    }
-
-    public private(set) var resultMap: ResultMap
-
-    public init(unsafeResultMap: ResultMap) {
-      self.resultMap = unsafeResultMap
-    }
-
-    public init(createChannelMessage: CreateChannelMessage? = nil) {
-      self.init(unsafeResultMap: ["__typename": "Mutation", "createChannelMessage": createChannelMessage.flatMap { (value: CreateChannelMessage) -> ResultMap in value.resultMap }])
-    }
-
-    public var createChannelMessage: CreateChannelMessage? {
-      get {
-        return (resultMap["createChannelMessage"] as? ResultMap).flatMap { CreateChannelMessage(unsafeResultMap: $0) }
-      }
-      set {
-        resultMap.updateValue(newValue?.resultMap, forKey: "createChannelMessage")
-      }
-    }
-
-    public struct CreateChannelMessage: GraphQLSelectionSet {
-      public static let possibleTypes: [String] = ["createChannelMessagePayload"]
-
-      public static var selections: [GraphQLSelection] {
-        return [
-          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-          GraphQLField("message", type: .object(Message.selections)),
-        ]
-      }
-
-      public private(set) var resultMap: ResultMap
-
-      public init(unsafeResultMap: ResultMap) {
-        self.resultMap = unsafeResultMap
-      }
-
-      public init(message: Message? = nil) {
-        self.init(unsafeResultMap: ["__typename": "createChannelMessagePayload", "message": message.flatMap { (value: Message) -> ResultMap in value.resultMap }])
-      }
-
-      public var __typename: String {
-        get {
-          return resultMap["__typename"]! as! String
-        }
-        set {
-          resultMap.updateValue(newValue, forKey: "__typename")
-        }
-      }
-
-      public var message: Message? {
-        get {
-          return (resultMap["message"] as? ResultMap).flatMap { Message(unsafeResultMap: $0) }
-        }
-        set {
-          resultMap.updateValue(newValue?.resultMap, forKey: "message")
-        }
-      }
-
-      public struct Message: GraphQLSelectionSet {
-        public static let possibleTypes: [String] = ["Messages"]
+      public struct ParentMessage: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["MessageParentType"]
 
         public static var selections: [GraphQLSelection] {
           return [
             GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
-            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-            GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
-            GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
-            GraphQLField("sort_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .scalar(String.self)),
+            GraphQLField("message_id", type: .scalar(String.self)),
+            GraphQLField("channel_id", type: .scalar(String.self)),
+            GraphQLField("sort_id", type: .scalar(String.self)),
             GraphQLField("message_type", type: .scalar(String.self)),
             GraphQLField("sender", type: .object(Sender.selections)),
             GraphQLField("admin", type: .object(Admin.selections)),
@@ -8479,8 +8085,8 @@ public final class CreateChannelMessageMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, messageId: String, channelId: String, sortId: String, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Messages", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+        public init(id: String? = nil, messageId: String? = nil, channelId: String? = nil, sortId: String? = nil, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "MessageParentType", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
         }
 
         public var __typename: String {
@@ -8492,37 +8098,36 @@ public final class CreateChannelMessageMutation: GraphQLMutation {
           }
         }
 
-        /// The ID of an object
-        public var id: GraphQLID {
+        public var id: String? {
           get {
-            return resultMap["id"]! as! GraphQLID
+            return resultMap["id"] as? String
           }
           set {
             resultMap.updateValue(newValue, forKey: "id")
           }
         }
 
-        public var messageId: String {
+        public var messageId: String? {
           get {
-            return resultMap["message_id"]! as! String
+            return resultMap["message_id"] as? String
           }
           set {
             resultMap.updateValue(newValue, forKey: "message_id")
           }
         }
 
-        public var channelId: String {
+        public var channelId: String? {
           get {
-            return resultMap["channel_id"]! as! String
+            return resultMap["channel_id"] as? String
           }
           set {
             resultMap.updateValue(newValue, forKey: "channel_id")
           }
         }
 
-        public var sortId: String {
+        public var sortId: String? {
           get {
-            return resultMap["sort_id"]! as! String
+            return resultMap["sort_id"] as? String
           }
           set {
             resultMap.updateValue(newValue, forKey: "sort_id")
@@ -8855,6 +8460,3211 @@ public final class CreateChannelMessageMutation: GraphQLMutation {
   }
 }
 
+public final class MessagesQuery: GraphQLQuery {
+  /// The raw GraphQL definition of this operation.
+  public let operationDefinition: String =
+    """
+    query messages($projectId: String!, $filter: String!, $option: String, $sort: String) {
+      messages(projectId: $projectId, filter: $filter, option: $option, sort: $sort) {
+        __typename
+        totalCount
+        edges {
+          __typename
+          node {
+            __typename
+            id
+            message_id
+            channel_id
+            sort_id
+            message_type
+            sender {
+              __typename
+              id
+              name
+              profile
+            }
+            admin {
+              __typename
+              id
+              name
+              profile
+            }
+            attachment_filenames {
+              __typename
+              name
+              size
+              type
+              url
+            }
+            has
+            embed_providers
+            embed_type
+            parent_message_id
+            parent_message {
+              __typename
+              id
+              message_id
+              channel_id
+              sort_id
+              message_type
+              sender {
+                __typename
+                id
+                name
+                profile
+              }
+              admin {
+                __typename
+                id
+                name
+                profile
+              }
+              attachment_filenames {
+                __typename
+                name
+                size
+                type
+                url
+              }
+              has
+              embed_providers
+              embed_type
+              isExpress
+              link_hostnames
+              mentions
+              bytes
+              mentions_everyone
+              content
+              sended_at
+              created_at
+            }
+            isExpress
+            link_hostnames
+            mentions
+            bytes
+            mentions_everyone
+            content
+            sended_at
+            created_at
+          }
+        }
+      }
+    }
+    """
+
+  public let operationName: String = "messages"
+
+  public var projectId: String
+  public var filter: String
+  public var option: String?
+  public var sort: String?
+
+  public init(projectId: String, filter: String, option: String? = nil, sort: String? = nil) {
+    self.projectId = projectId
+    self.filter = filter
+    self.option = option
+    self.sort = sort
+  }
+
+  public var variables: GraphQLMap? {
+    return ["projectId": projectId, "filter": filter, "option": option, "sort": sort]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes: [String] = ["Query"]
+
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("messages", arguments: ["projectId": GraphQLVariable("projectId"), "filter": GraphQLVariable("filter"), "option": GraphQLVariable("option"), "sort": GraphQLVariable("sort")], type: .object(Message.selections)),
+      ]
+    }
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(messages: Message? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Query", "messages": messages.flatMap { (value: Message) -> ResultMap in value.resultMap }])
+    }
+
+    public var messages: Message? {
+      get {
+        return (resultMap["messages"] as? ResultMap).flatMap { Message(unsafeResultMap: $0) }
+      }
+      set {
+        resultMap.updateValue(newValue?.resultMap, forKey: "messages")
+      }
+    }
+
+    public struct Message: GraphQLSelectionSet {
+      public static let possibleTypes: [String] = ["MessagesConnection"]
+
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("totalCount", type: .nonNull(.scalar(Int.self))),
+          GraphQLField("edges", type: .list(.object(Edge.selections))),
+        ]
+      }
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public init(totalCount: Int, edges: [Edge?]? = nil) {
+        self.init(unsafeResultMap: ["__typename": "MessagesConnection", "totalCount": totalCount, "edges": edges.flatMap { (value: [Edge?]) -> [ResultMap?] in value.map { (value: Edge?) -> ResultMap? in value.flatMap { (value: Edge) -> ResultMap in value.resultMap } } }])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      public var totalCount: Int {
+        get {
+          return resultMap["totalCount"]! as! Int
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "totalCount")
+        }
+      }
+
+      /// A list of edges.
+      public var edges: [Edge?]? {
+        get {
+          return (resultMap["edges"] as? [ResultMap?]).flatMap { (value: [ResultMap?]) -> [Edge?] in value.map { (value: ResultMap?) -> Edge? in value.flatMap { (value: ResultMap) -> Edge in Edge(unsafeResultMap: value) } } }
+        }
+        set {
+          resultMap.updateValue(newValue.flatMap { (value: [Edge?]) -> [ResultMap?] in value.map { (value: Edge?) -> ResultMap? in value.flatMap { (value: Edge) -> ResultMap in value.resultMap } } }, forKey: "edges")
+        }
+      }
+
+      public struct Edge: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["MessagesEdge"]
+
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("node", type: .object(Node.selections)),
+          ]
+        }
+
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public init(node: Node? = nil) {
+          self.init(unsafeResultMap: ["__typename": "MessagesEdge", "node": node.flatMap { (value: Node) -> ResultMap in value.resultMap }])
+        }
+
+        public var __typename: String {
+          get {
+            return resultMap["__typename"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// The item at the end of the edge
+        public var node: Node? {
+          get {
+            return (resultMap["node"] as? ResultMap).flatMap { Node(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "node")
+          }
+        }
+
+        public struct Node: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Messages"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+              GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
+              GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
+              GraphQLField("sort_id", type: .nonNull(.scalar(String.self))),
+              GraphQLField("message_type", type: .scalar(String.self)),
+              GraphQLField("sender", type: .object(Sender.selections)),
+              GraphQLField("admin", type: .object(Admin.selections)),
+              GraphQLField("attachment_filenames", type: .object(AttachmentFilename.selections)),
+              GraphQLField("has", type: .scalar(String.self)),
+              GraphQLField("embed_providers", type: .scalar(String.self)),
+              GraphQLField("embed_type", type: .scalar(String.self)),
+              GraphQLField("parent_message_id", type: .scalar(String.self)),
+              GraphQLField("parent_message", type: .object(ParentMessage.selections)),
+              GraphQLField("isExpress", type: .scalar(Bool.self)),
+              GraphQLField("link_hostnames", type: .scalar(String.self)),
+              GraphQLField("mentions", type: .list(.scalar(String.self))),
+              GraphQLField("bytes", type: .scalar(Int.self)),
+              GraphQLField("mentions_everyone", type: .scalar(String.self)),
+              GraphQLField("content", type: .scalar(String.self)),
+              GraphQLField("sended_at", type: .scalar(String.self)),
+              GraphQLField("created_at", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: GraphQLID, messageId: String, channelId: String, sortId: String, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, parentMessageId: String? = nil, parentMessage: ParentMessage? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Messages", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "parent_message_id": parentMessageId, "parent_message": parentMessage.flatMap { (value: ParentMessage) -> ResultMap in value.resultMap }, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          /// The ID of an object
+          public var id: GraphQLID {
+            get {
+              return resultMap["id"]! as! GraphQLID
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var messageId: String {
+            get {
+              return resultMap["message_id"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "message_id")
+            }
+          }
+
+          public var channelId: String {
+            get {
+              return resultMap["channel_id"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "channel_id")
+            }
+          }
+
+          public var sortId: String {
+            get {
+              return resultMap["sort_id"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "sort_id")
+            }
+          }
+
+          public var messageType: String? {
+            get {
+              return resultMap["message_type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "message_type")
+            }
+          }
+
+          public var sender: Sender? {
+            get {
+              return (resultMap["sender"] as? ResultMap).flatMap { Sender(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "sender")
+            }
+          }
+
+          public var admin: Admin? {
+            get {
+              return (resultMap["admin"] as? ResultMap).flatMap { Admin(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "admin")
+            }
+          }
+
+          public var attachmentFilenames: AttachmentFilename? {
+            get {
+              return (resultMap["attachment_filenames"] as? ResultMap).flatMap { AttachmentFilename(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "attachment_filenames")
+            }
+          }
+
+          public var has: String? {
+            get {
+              return resultMap["has"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "has")
+            }
+          }
+
+          public var embedProviders: String? {
+            get {
+              return resultMap["embed_providers"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "embed_providers")
+            }
+          }
+
+          public var embedType: String? {
+            get {
+              return resultMap["embed_type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "embed_type")
+            }
+          }
+
+          public var parentMessageId: String? {
+            get {
+              return resultMap["parent_message_id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "parent_message_id")
+            }
+          }
+
+          public var parentMessage: ParentMessage? {
+            get {
+              return (resultMap["parent_message"] as? ResultMap).flatMap { ParentMessage(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "parent_message")
+            }
+          }
+
+          public var isExpress: Bool? {
+            get {
+              return resultMap["isExpress"] as? Bool
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "isExpress")
+            }
+          }
+
+          public var linkHostnames: String? {
+            get {
+              return resultMap["link_hostnames"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "link_hostnames")
+            }
+          }
+
+          public var mentions: [String?]? {
+            get {
+              return resultMap["mentions"] as? [String?]
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "mentions")
+            }
+          }
+
+          public var bytes: Int? {
+            get {
+              return resultMap["bytes"] as? Int
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "bytes")
+            }
+          }
+
+          public var mentionsEveryone: String? {
+            get {
+              return resultMap["mentions_everyone"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "mentions_everyone")
+            }
+          }
+
+          public var content: String? {
+            get {
+              return resultMap["content"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "content")
+            }
+          }
+
+          public var sendedAt: String? {
+            get {
+              return resultMap["sended_at"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "sended_at")
+            }
+          }
+
+          public var createdAt: String? {
+            get {
+              return resultMap["created_at"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "created_at")
+            }
+          }
+
+          public struct Sender: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Sender"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .scalar(String.self)),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("profile", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var id: String? {
+              get {
+                return resultMap["id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var profile: String? {
+              get {
+                return resultMap["profile"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "profile")
+              }
+            }
+          }
+
+          public struct Admin: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Sender"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .scalar(String.self)),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("profile", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var id: String? {
+              get {
+                return resultMap["id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var profile: String? {
+              get {
+                return resultMap["profile"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "profile")
+              }
+            }
+          }
+
+          public struct AttachmentFilename: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Attachment"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("size", type: .scalar(Double.self)),
+                GraphQLField("type", type: .scalar(String.self)),
+                GraphQLField("url", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(name: String? = nil, size: Double? = nil, type: String? = nil, url: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Attachment", "name": name, "size": size, "type": type, "url": url])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var size: Double? {
+              get {
+                return resultMap["size"] as? Double
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "size")
+              }
+            }
+
+            public var type: String? {
+              get {
+                return resultMap["type"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "type")
+              }
+            }
+
+            public var url: String? {
+              get {
+                return resultMap["url"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "url")
+              }
+            }
+          }
+
+          public struct ParentMessage: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["MessageParentType"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .scalar(String.self)),
+                GraphQLField("message_id", type: .scalar(String.self)),
+                GraphQLField("channel_id", type: .scalar(String.self)),
+                GraphQLField("sort_id", type: .scalar(String.self)),
+                GraphQLField("message_type", type: .scalar(String.self)),
+                GraphQLField("sender", type: .object(Sender.selections)),
+                GraphQLField("admin", type: .object(Admin.selections)),
+                GraphQLField("attachment_filenames", type: .object(AttachmentFilename.selections)),
+                GraphQLField("has", type: .scalar(String.self)),
+                GraphQLField("embed_providers", type: .scalar(String.self)),
+                GraphQLField("embed_type", type: .scalar(String.self)),
+                GraphQLField("isExpress", type: .scalar(Bool.self)),
+                GraphQLField("link_hostnames", type: .scalar(String.self)),
+                GraphQLField("mentions", type: .list(.scalar(String.self))),
+                GraphQLField("bytes", type: .scalar(Int.self)),
+                GraphQLField("mentions_everyone", type: .scalar(String.self)),
+                GraphQLField("content", type: .scalar(String.self)),
+                GraphQLField("sended_at", type: .scalar(String.self)),
+                GraphQLField("created_at", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(id: String? = nil, messageId: String? = nil, channelId: String? = nil, sortId: String? = nil, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "MessageParentType", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var id: String? {
+              get {
+                return resultMap["id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
+              }
+            }
+
+            public var messageId: String? {
+              get {
+                return resultMap["message_id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "message_id")
+              }
+            }
+
+            public var channelId: String? {
+              get {
+                return resultMap["channel_id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "channel_id")
+              }
+            }
+
+            public var sortId: String? {
+              get {
+                return resultMap["sort_id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "sort_id")
+              }
+            }
+
+            public var messageType: String? {
+              get {
+                return resultMap["message_type"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "message_type")
+              }
+            }
+
+            public var sender: Sender? {
+              get {
+                return (resultMap["sender"] as? ResultMap).flatMap { Sender(unsafeResultMap: $0) }
+              }
+              set {
+                resultMap.updateValue(newValue?.resultMap, forKey: "sender")
+              }
+            }
+
+            public var admin: Admin? {
+              get {
+                return (resultMap["admin"] as? ResultMap).flatMap { Admin(unsafeResultMap: $0) }
+              }
+              set {
+                resultMap.updateValue(newValue?.resultMap, forKey: "admin")
+              }
+            }
+
+            public var attachmentFilenames: AttachmentFilename? {
+              get {
+                return (resultMap["attachment_filenames"] as? ResultMap).flatMap { AttachmentFilename(unsafeResultMap: $0) }
+              }
+              set {
+                resultMap.updateValue(newValue?.resultMap, forKey: "attachment_filenames")
+              }
+            }
+
+            public var has: String? {
+              get {
+                return resultMap["has"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "has")
+              }
+            }
+
+            public var embedProviders: String? {
+              get {
+                return resultMap["embed_providers"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "embed_providers")
+              }
+            }
+
+            public var embedType: String? {
+              get {
+                return resultMap["embed_type"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "embed_type")
+              }
+            }
+
+            public var isExpress: Bool? {
+              get {
+                return resultMap["isExpress"] as? Bool
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "isExpress")
+              }
+            }
+
+            public var linkHostnames: String? {
+              get {
+                return resultMap["link_hostnames"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "link_hostnames")
+              }
+            }
+
+            public var mentions: [String?]? {
+              get {
+                return resultMap["mentions"] as? [String?]
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "mentions")
+              }
+            }
+
+            public var bytes: Int? {
+              get {
+                return resultMap["bytes"] as? Int
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "bytes")
+              }
+            }
+
+            public var mentionsEveryone: String? {
+              get {
+                return resultMap["mentions_everyone"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "mentions_everyone")
+              }
+            }
+
+            public var content: String? {
+              get {
+                return resultMap["content"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "content")
+              }
+            }
+
+            public var sendedAt: String? {
+              get {
+                return resultMap["sended_at"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "sended_at")
+              }
+            }
+
+            public var createdAt: String? {
+              get {
+                return resultMap["created_at"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "created_at")
+              }
+            }
+
+            public struct Sender: GraphQLSelectionSet {
+              public static let possibleTypes: [String] = ["Sender"]
+
+              public static var selections: [GraphQLSelection] {
+                return [
+                  GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                  GraphQLField("id", type: .scalar(String.self)),
+                  GraphQLField("name", type: .scalar(String.self)),
+                  GraphQLField("profile", type: .scalar(String.self)),
+                ]
+              }
+
+              public private(set) var resultMap: ResultMap
+
+              public init(unsafeResultMap: ResultMap) {
+                self.resultMap = unsafeResultMap
+              }
+
+              public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+                self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+              }
+
+              public var __typename: String {
+                get {
+                  return resultMap["__typename"]! as! String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "__typename")
+                }
+              }
+
+              public var id: String? {
+                get {
+                  return resultMap["id"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "id")
+                }
+              }
+
+              public var name: String? {
+                get {
+                  return resultMap["name"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "name")
+                }
+              }
+
+              public var profile: String? {
+                get {
+                  return resultMap["profile"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "profile")
+                }
+              }
+            }
+
+            public struct Admin: GraphQLSelectionSet {
+              public static let possibleTypes: [String] = ["Sender"]
+
+              public static var selections: [GraphQLSelection] {
+                return [
+                  GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                  GraphQLField("id", type: .scalar(String.self)),
+                  GraphQLField("name", type: .scalar(String.self)),
+                  GraphQLField("profile", type: .scalar(String.self)),
+                ]
+              }
+
+              public private(set) var resultMap: ResultMap
+
+              public init(unsafeResultMap: ResultMap) {
+                self.resultMap = unsafeResultMap
+              }
+
+              public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+                self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+              }
+
+              public var __typename: String {
+                get {
+                  return resultMap["__typename"]! as! String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "__typename")
+                }
+              }
+
+              public var id: String? {
+                get {
+                  return resultMap["id"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "id")
+                }
+              }
+
+              public var name: String? {
+                get {
+                  return resultMap["name"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "name")
+                }
+              }
+
+              public var profile: String? {
+                get {
+                  return resultMap["profile"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "profile")
+                }
+              }
+            }
+
+            public struct AttachmentFilename: GraphQLSelectionSet {
+              public static let possibleTypes: [String] = ["Attachment"]
+
+              public static var selections: [GraphQLSelection] {
+                return [
+                  GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                  GraphQLField("name", type: .scalar(String.self)),
+                  GraphQLField("size", type: .scalar(Double.self)),
+                  GraphQLField("type", type: .scalar(String.self)),
+                  GraphQLField("url", type: .scalar(String.self)),
+                ]
+              }
+
+              public private(set) var resultMap: ResultMap
+
+              public init(unsafeResultMap: ResultMap) {
+                self.resultMap = unsafeResultMap
+              }
+
+              public init(name: String? = nil, size: Double? = nil, type: String? = nil, url: String? = nil) {
+                self.init(unsafeResultMap: ["__typename": "Attachment", "name": name, "size": size, "type": type, "url": url])
+              }
+
+              public var __typename: String {
+                get {
+                  return resultMap["__typename"]! as! String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "__typename")
+                }
+              }
+
+              public var name: String? {
+                get {
+                  return resultMap["name"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "name")
+                }
+              }
+
+              public var size: Double? {
+                get {
+                  return resultMap["size"] as? Double
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "size")
+                }
+              }
+
+              public var type: String? {
+                get {
+                  return resultMap["type"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "type")
+                }
+              }
+
+              public var url: String? {
+                get {
+                  return resultMap["url"] as? String
+                }
+                set {
+                  resultMap.updateValue(newValue, forKey: "url")
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+public final class MarkQuery: GraphQLQuery {
+  /// The raw GraphQL definition of this operation.
+  public let operationDefinition: String =
+    """
+    query mark($projectId: String!, $channelId: String!) {
+      mark(projectId: $projectId, channelId: $channelId) {
+        __typename
+        user_id
+        message_id
+        sort_id
+        unread
+      }
+    }
+    """
+
+  public let operationName: String = "mark"
+
+  public var projectId: String
+  public var channelId: String
+
+  public init(projectId: String, channelId: String) {
+    self.projectId = projectId
+    self.channelId = channelId
+  }
+
+  public var variables: GraphQLMap? {
+    return ["projectId": projectId, "channelId": channelId]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes: [String] = ["Query"]
+
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("mark", arguments: ["projectId": GraphQLVariable("projectId"), "channelId": GraphQLVariable("channelId")], type: .object(Mark.selections)),
+      ]
+    }
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(mark: Mark? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Query", "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }])
+    }
+
+    public var mark: Mark? {
+      get {
+        return (resultMap["mark"] as? ResultMap).flatMap { Mark(unsafeResultMap: $0) }
+      }
+      set {
+        resultMap.updateValue(newValue?.resultMap, forKey: "mark")
+      }
+    }
+
+    public struct Mark: GraphQLSelectionSet {
+      public static let possibleTypes: [String] = ["Mark"]
+
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("user_id", type: .scalar(String.self)),
+          GraphQLField("message_id", type: .scalar(String.self)),
+          GraphQLField("sort_id", type: .scalar(String.self)),
+          GraphQLField("unread", type: .scalar(Int.self)),
+        ]
+      }
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public init(userId: String? = nil, messageId: String? = nil, sortId: String? = nil, unread: Int? = nil) {
+        self.init(unsafeResultMap: ["__typename": "Mark", "user_id": userId, "message_id": messageId, "sort_id": sortId, "unread": unread])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      public var userId: String? {
+        get {
+          return resultMap["user_id"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "user_id")
+        }
+      }
+
+      public var messageId: String? {
+        get {
+          return resultMap["message_id"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "message_id")
+        }
+      }
+
+      public var sortId: String? {
+        get {
+          return resultMap["sort_id"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "sort_id")
+        }
+      }
+
+      public var unread: Int? {
+        get {
+          return resultMap["unread"] as? Int
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "unread")
+        }
+      }
+    }
+  }
+}
+
+public final class CreateChannelMessageMutation: GraphQLMutation {
+  /// The raw GraphQL definition of this operation.
+  public let operationDefinition: String =
+    """
+    mutation createChannelMessage($projectId: String!, $channelId: String!, $content: String!) {
+      createChannelMessage(
+        input: {projectId: $projectId, channelId: $channelId, content: $content}
+      ) {
+        __typename
+        message {
+          __typename
+          id
+          message_id
+          channel_id
+          sort_id
+          message_type
+          sender {
+            __typename
+            id
+            name
+            profile
+          }
+          admin {
+            __typename
+            id
+            name
+            profile
+          }
+          attachment_filenames {
+            __typename
+            name
+            size
+            type
+            url
+          }
+          has
+          embed_providers
+          embed_type
+          parent_message_id
+          parent_message {
+            __typename
+            id
+            message_id
+            channel_id
+            sort_id
+            message_type
+            sender {
+              __typename
+              id
+              name
+              profile
+            }
+            admin {
+              __typename
+              id
+              name
+              profile
+            }
+            attachment_filenames {
+              __typename
+              name
+              size
+              type
+              url
+            }
+            has
+            embed_providers
+            embed_type
+            isExpress
+            link_hostnames
+            mentions
+            bytes
+            mentions_everyone
+            content
+            sended_at
+            created_at
+          }
+          isExpress
+          link_hostnames
+          mentions
+          bytes
+          mentions_everyone
+          content
+          sended_at
+          created_at
+        }
+      }
+    }
+    """
+
+  public let operationName: String = "createChannelMessage"
+
+  public var projectId: String
+  public var channelId: String
+  public var content: String
+
+  public init(projectId: String, channelId: String, content: String) {
+    self.projectId = projectId
+    self.channelId = channelId
+    self.content = content
+  }
+
+  public var variables: GraphQLMap? {
+    return ["projectId": projectId, "channelId": channelId, "content": content]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes: [String] = ["Mutation"]
+
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("createChannelMessage", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "channelId": GraphQLVariable("channelId"), "content": GraphQLVariable("content")]], type: .object(CreateChannelMessage.selections)),
+      ]
+    }
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(createChannelMessage: CreateChannelMessage? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Mutation", "createChannelMessage": createChannelMessage.flatMap { (value: CreateChannelMessage) -> ResultMap in value.resultMap }])
+    }
+
+    public var createChannelMessage: CreateChannelMessage? {
+      get {
+        return (resultMap["createChannelMessage"] as? ResultMap).flatMap { CreateChannelMessage(unsafeResultMap: $0) }
+      }
+      set {
+        resultMap.updateValue(newValue?.resultMap, forKey: "createChannelMessage")
+      }
+    }
+
+    public struct CreateChannelMessage: GraphQLSelectionSet {
+      public static let possibleTypes: [String] = ["createChannelMessagePayload"]
+
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("message", type: .object(Message.selections)),
+        ]
+      }
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public init(message: Message? = nil) {
+        self.init(unsafeResultMap: ["__typename": "createChannelMessagePayload", "message": message.flatMap { (value: Message) -> ResultMap in value.resultMap }])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      public var message: Message? {
+        get {
+          return (resultMap["message"] as? ResultMap).flatMap { Message(unsafeResultMap: $0) }
+        }
+        set {
+          resultMap.updateValue(newValue?.resultMap, forKey: "message")
+        }
+      }
+
+      public struct Message: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["Messages"]
+
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+            GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("sort_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("message_type", type: .scalar(String.self)),
+            GraphQLField("sender", type: .object(Sender.selections)),
+            GraphQLField("admin", type: .object(Admin.selections)),
+            GraphQLField("attachment_filenames", type: .object(AttachmentFilename.selections)),
+            GraphQLField("has", type: .scalar(String.self)),
+            GraphQLField("embed_providers", type: .scalar(String.self)),
+            GraphQLField("embed_type", type: .scalar(String.self)),
+            GraphQLField("parent_message_id", type: .scalar(String.self)),
+            GraphQLField("parent_message", type: .object(ParentMessage.selections)),
+            GraphQLField("isExpress", type: .scalar(Bool.self)),
+            GraphQLField("link_hostnames", type: .scalar(String.self)),
+            GraphQLField("mentions", type: .list(.scalar(String.self))),
+            GraphQLField("bytes", type: .scalar(Int.self)),
+            GraphQLField("mentions_everyone", type: .scalar(String.self)),
+            GraphQLField("content", type: .scalar(String.self)),
+            GraphQLField("sended_at", type: .scalar(String.self)),
+            GraphQLField("created_at", type: .scalar(String.self)),
+          ]
+        }
+
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public init(id: GraphQLID, messageId: String, channelId: String, sortId: String, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, parentMessageId: String? = nil, parentMessage: ParentMessage? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Messages", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "parent_message_id": parentMessageId, "parent_message": parentMessage.flatMap { (value: ParentMessage) -> ResultMap in value.resultMap }, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+        }
+
+        public var __typename: String {
+          get {
+            return resultMap["__typename"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// The ID of an object
+        public var id: GraphQLID {
+          get {
+            return resultMap["id"]! as! GraphQLID
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "id")
+          }
+        }
+
+        public var messageId: String {
+          get {
+            return resultMap["message_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "message_id")
+          }
+        }
+
+        public var channelId: String {
+          get {
+            return resultMap["channel_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "channel_id")
+          }
+        }
+
+        public var sortId: String {
+          get {
+            return resultMap["sort_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "sort_id")
+          }
+        }
+
+        public var messageType: String? {
+          get {
+            return resultMap["message_type"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "message_type")
+          }
+        }
+
+        public var sender: Sender? {
+          get {
+            return (resultMap["sender"] as? ResultMap).flatMap { Sender(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "sender")
+          }
+        }
+
+        public var admin: Admin? {
+          get {
+            return (resultMap["admin"] as? ResultMap).flatMap { Admin(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "admin")
+          }
+        }
+
+        public var attachmentFilenames: AttachmentFilename? {
+          get {
+            return (resultMap["attachment_filenames"] as? ResultMap).flatMap { AttachmentFilename(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "attachment_filenames")
+          }
+        }
+
+        public var has: String? {
+          get {
+            return resultMap["has"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "has")
+          }
+        }
+
+        public var embedProviders: String? {
+          get {
+            return resultMap["embed_providers"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "embed_providers")
+          }
+        }
+
+        public var embedType: String? {
+          get {
+            return resultMap["embed_type"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "embed_type")
+          }
+        }
+
+        public var parentMessageId: String? {
+          get {
+            return resultMap["parent_message_id"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "parent_message_id")
+          }
+        }
+
+        public var parentMessage: ParentMessage? {
+          get {
+            return (resultMap["parent_message"] as? ResultMap).flatMap { ParentMessage(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "parent_message")
+          }
+        }
+
+        public var isExpress: Bool? {
+          get {
+            return resultMap["isExpress"] as? Bool
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "isExpress")
+          }
+        }
+
+        public var linkHostnames: String? {
+          get {
+            return resultMap["link_hostnames"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "link_hostnames")
+          }
+        }
+
+        public var mentions: [String?]? {
+          get {
+            return resultMap["mentions"] as? [String?]
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "mentions")
+          }
+        }
+
+        public var bytes: Int? {
+          get {
+            return resultMap["bytes"] as? Int
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "bytes")
+          }
+        }
+
+        public var mentionsEveryone: String? {
+          get {
+            return resultMap["mentions_everyone"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "mentions_everyone")
+          }
+        }
+
+        public var content: String? {
+          get {
+            return resultMap["content"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "content")
+          }
+        }
+
+        public var sendedAt: String? {
+          get {
+            return resultMap["sended_at"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "sended_at")
+          }
+        }
+
+        public var createdAt: String? {
+          get {
+            return resultMap["created_at"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "created_at")
+          }
+        }
+
+        public struct Sender: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Sender"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .scalar(String.self)),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("profile", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var id: String? {
+            get {
+              return resultMap["id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var profile: String? {
+            get {
+              return resultMap["profile"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "profile")
+            }
+          }
+        }
+
+        public struct Admin: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Sender"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .scalar(String.self)),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("profile", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var id: String? {
+            get {
+              return resultMap["id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var profile: String? {
+            get {
+              return resultMap["profile"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "profile")
+            }
+          }
+        }
+
+        public struct AttachmentFilename: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Attachment"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("size", type: .scalar(Double.self)),
+              GraphQLField("type", type: .scalar(String.self)),
+              GraphQLField("url", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(name: String? = nil, size: Double? = nil, type: String? = nil, url: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Attachment", "name": name, "size": size, "type": type, "url": url])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var size: Double? {
+            get {
+              return resultMap["size"] as? Double
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "size")
+            }
+          }
+
+          public var type: String? {
+            get {
+              return resultMap["type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "type")
+            }
+          }
+
+          public var url: String? {
+            get {
+              return resultMap["url"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "url")
+            }
+          }
+        }
+
+        public struct ParentMessage: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["MessageParentType"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .scalar(String.self)),
+              GraphQLField("message_id", type: .scalar(String.self)),
+              GraphQLField("channel_id", type: .scalar(String.self)),
+              GraphQLField("sort_id", type: .scalar(String.self)),
+              GraphQLField("message_type", type: .scalar(String.self)),
+              GraphQLField("sender", type: .object(Sender.selections)),
+              GraphQLField("admin", type: .object(Admin.selections)),
+              GraphQLField("attachment_filenames", type: .object(AttachmentFilename.selections)),
+              GraphQLField("has", type: .scalar(String.self)),
+              GraphQLField("embed_providers", type: .scalar(String.self)),
+              GraphQLField("embed_type", type: .scalar(String.self)),
+              GraphQLField("isExpress", type: .scalar(Bool.self)),
+              GraphQLField("link_hostnames", type: .scalar(String.self)),
+              GraphQLField("mentions", type: .list(.scalar(String.self))),
+              GraphQLField("bytes", type: .scalar(Int.self)),
+              GraphQLField("mentions_everyone", type: .scalar(String.self)),
+              GraphQLField("content", type: .scalar(String.self)),
+              GraphQLField("sended_at", type: .scalar(String.self)),
+              GraphQLField("created_at", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: String? = nil, messageId: String? = nil, channelId: String? = nil, sortId: String? = nil, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "MessageParentType", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var id: String? {
+            get {
+              return resultMap["id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var messageId: String? {
+            get {
+              return resultMap["message_id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "message_id")
+            }
+          }
+
+          public var channelId: String? {
+            get {
+              return resultMap["channel_id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "channel_id")
+            }
+          }
+
+          public var sortId: String? {
+            get {
+              return resultMap["sort_id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "sort_id")
+            }
+          }
+
+          public var messageType: String? {
+            get {
+              return resultMap["message_type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "message_type")
+            }
+          }
+
+          public var sender: Sender? {
+            get {
+              return (resultMap["sender"] as? ResultMap).flatMap { Sender(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "sender")
+            }
+          }
+
+          public var admin: Admin? {
+            get {
+              return (resultMap["admin"] as? ResultMap).flatMap { Admin(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "admin")
+            }
+          }
+
+          public var attachmentFilenames: AttachmentFilename? {
+            get {
+              return (resultMap["attachment_filenames"] as? ResultMap).flatMap { AttachmentFilename(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "attachment_filenames")
+            }
+          }
+
+          public var has: String? {
+            get {
+              return resultMap["has"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "has")
+            }
+          }
+
+          public var embedProviders: String? {
+            get {
+              return resultMap["embed_providers"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "embed_providers")
+            }
+          }
+
+          public var embedType: String? {
+            get {
+              return resultMap["embed_type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "embed_type")
+            }
+          }
+
+          public var isExpress: Bool? {
+            get {
+              return resultMap["isExpress"] as? Bool
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "isExpress")
+            }
+          }
+
+          public var linkHostnames: String? {
+            get {
+              return resultMap["link_hostnames"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "link_hostnames")
+            }
+          }
+
+          public var mentions: [String?]? {
+            get {
+              return resultMap["mentions"] as? [String?]
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "mentions")
+            }
+          }
+
+          public var bytes: Int? {
+            get {
+              return resultMap["bytes"] as? Int
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "bytes")
+            }
+          }
+
+          public var mentionsEveryone: String? {
+            get {
+              return resultMap["mentions_everyone"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "mentions_everyone")
+            }
+          }
+
+          public var content: String? {
+            get {
+              return resultMap["content"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "content")
+            }
+          }
+
+          public var sendedAt: String? {
+            get {
+              return resultMap["sended_at"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "sended_at")
+            }
+          }
+
+          public var createdAt: String? {
+            get {
+              return resultMap["created_at"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "created_at")
+            }
+          }
+
+          public struct Sender: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Sender"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .scalar(String.self)),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("profile", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var id: String? {
+              get {
+                return resultMap["id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var profile: String? {
+              get {
+                return resultMap["profile"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "profile")
+              }
+            }
+          }
+
+          public struct Admin: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Sender"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .scalar(String.self)),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("profile", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var id: String? {
+              get {
+                return resultMap["id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var profile: String? {
+              get {
+                return resultMap["profile"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "profile")
+              }
+            }
+          }
+
+          public struct AttachmentFilename: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Attachment"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("size", type: .scalar(Double.self)),
+                GraphQLField("type", type: .scalar(String.self)),
+                GraphQLField("url", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(name: String? = nil, size: Double? = nil, type: String? = nil, url: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Attachment", "name": name, "size": size, "type": type, "url": url])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var size: Double? {
+              get {
+                return resultMap["size"] as? Double
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "size")
+              }
+            }
+
+            public var type: String? {
+              get {
+                return resultMap["type"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "type")
+              }
+            }
+
+            public var url: String? {
+              get {
+                return resultMap["url"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "url")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+public final class DeleteMessageMutation: GraphQLMutation {
+  /// The raw GraphQL definition of this operation.
+  public let operationDefinition: String =
+    """
+    mutation deleteMessage($projectId: String!, $channelId: String!, $id: ID!) {
+      deleteMessage(input: {projectId: $projectId, channelId: $channelId, id: $id}) {
+        __typename
+        message {
+          __typename
+          id
+          message_id
+          channel_id
+          sort_id
+          message_type
+          sender {
+            __typename
+            id
+            name
+            profile
+          }
+          admin {
+            __typename
+            id
+            name
+            profile
+          }
+          attachment_filenames {
+            __typename
+            name
+            size
+            type
+            url
+          }
+          has
+          embed_providers
+          embed_type
+          parent_message_id
+          parent_message {
+            __typename
+            id
+            message_id
+            channel_id
+            sort_id
+            message_type
+            sender {
+              __typename
+              id
+              name
+              profile
+            }
+            admin {
+              __typename
+              id
+              name
+              profile
+            }
+            attachment_filenames {
+              __typename
+              name
+              size
+              type
+              url
+            }
+            has
+            embed_providers
+            embed_type
+            isExpress
+            link_hostnames
+            mentions
+            bytes
+            mentions_everyone
+            content
+            sended_at
+            created_at
+          }
+          isExpress
+          link_hostnames
+          mentions
+          bytes
+          mentions_everyone
+          content
+          sended_at
+          created_at
+        }
+      }
+    }
+    """
+
+  public let operationName: String = "deleteMessage"
+
+  public var projectId: String
+  public var channelId: String
+  public var id: GraphQLID
+
+  public init(projectId: String, channelId: String, id: GraphQLID) {
+    self.projectId = projectId
+    self.channelId = channelId
+    self.id = id
+  }
+
+  public var variables: GraphQLMap? {
+    return ["projectId": projectId, "channelId": channelId, "id": id]
+  }
+
+  public struct Data: GraphQLSelectionSet {
+    public static let possibleTypes: [String] = ["Mutation"]
+
+    public static var selections: [GraphQLSelection] {
+      return [
+        GraphQLField("deleteMessage", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "channelId": GraphQLVariable("channelId"), "id": GraphQLVariable("id")]], type: .object(DeleteMessage.selections)),
+      ]
+    }
+
+    public private(set) var resultMap: ResultMap
+
+    public init(unsafeResultMap: ResultMap) {
+      self.resultMap = unsafeResultMap
+    }
+
+    public init(deleteMessage: DeleteMessage? = nil) {
+      self.init(unsafeResultMap: ["__typename": "Mutation", "deleteMessage": deleteMessage.flatMap { (value: DeleteMessage) -> ResultMap in value.resultMap }])
+    }
+
+    public var deleteMessage: DeleteMessage? {
+      get {
+        return (resultMap["deleteMessage"] as? ResultMap).flatMap { DeleteMessage(unsafeResultMap: $0) }
+      }
+      set {
+        resultMap.updateValue(newValue?.resultMap, forKey: "deleteMessage")
+      }
+    }
+
+    public struct DeleteMessage: GraphQLSelectionSet {
+      public static let possibleTypes: [String] = ["deleteMessagePayload"]
+
+      public static var selections: [GraphQLSelection] {
+        return [
+          GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+          GraphQLField("message", type: .object(Message.selections)),
+        ]
+      }
+
+      public private(set) var resultMap: ResultMap
+
+      public init(unsafeResultMap: ResultMap) {
+        self.resultMap = unsafeResultMap
+      }
+
+      public init(message: Message? = nil) {
+        self.init(unsafeResultMap: ["__typename": "deleteMessagePayload", "message": message.flatMap { (value: Message) -> ResultMap in value.resultMap }])
+      }
+
+      public var __typename: String {
+        get {
+          return resultMap["__typename"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "__typename")
+        }
+      }
+
+      public var message: Message? {
+        get {
+          return (resultMap["message"] as? ResultMap).flatMap { Message(unsafeResultMap: $0) }
+        }
+        set {
+          resultMap.updateValue(newValue?.resultMap, forKey: "message")
+        }
+      }
+
+      public struct Message: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["Messages"]
+
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+            GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("sort_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("message_type", type: .scalar(String.self)),
+            GraphQLField("sender", type: .object(Sender.selections)),
+            GraphQLField("admin", type: .object(Admin.selections)),
+            GraphQLField("attachment_filenames", type: .object(AttachmentFilename.selections)),
+            GraphQLField("has", type: .scalar(String.self)),
+            GraphQLField("embed_providers", type: .scalar(String.self)),
+            GraphQLField("embed_type", type: .scalar(String.self)),
+            GraphQLField("parent_message_id", type: .scalar(String.self)),
+            GraphQLField("parent_message", type: .object(ParentMessage.selections)),
+            GraphQLField("isExpress", type: .scalar(Bool.self)),
+            GraphQLField("link_hostnames", type: .scalar(String.self)),
+            GraphQLField("mentions", type: .list(.scalar(String.self))),
+            GraphQLField("bytes", type: .scalar(Int.self)),
+            GraphQLField("mentions_everyone", type: .scalar(String.self)),
+            GraphQLField("content", type: .scalar(String.self)),
+            GraphQLField("sended_at", type: .scalar(String.self)),
+            GraphQLField("created_at", type: .scalar(String.self)),
+          ]
+        }
+
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public init(id: GraphQLID, messageId: String, channelId: String, sortId: String, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, parentMessageId: String? = nil, parentMessage: ParentMessage? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Messages", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "parent_message_id": parentMessageId, "parent_message": parentMessage.flatMap { (value: ParentMessage) -> ResultMap in value.resultMap }, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+        }
+
+        public var __typename: String {
+          get {
+            return resultMap["__typename"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// The ID of an object
+        public var id: GraphQLID {
+          get {
+            return resultMap["id"]! as! GraphQLID
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "id")
+          }
+        }
+
+        public var messageId: String {
+          get {
+            return resultMap["message_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "message_id")
+          }
+        }
+
+        public var channelId: String {
+          get {
+            return resultMap["channel_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "channel_id")
+          }
+        }
+
+        public var sortId: String {
+          get {
+            return resultMap["sort_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "sort_id")
+          }
+        }
+
+        public var messageType: String? {
+          get {
+            return resultMap["message_type"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "message_type")
+          }
+        }
+
+        public var sender: Sender? {
+          get {
+            return (resultMap["sender"] as? ResultMap).flatMap { Sender(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "sender")
+          }
+        }
+
+        public var admin: Admin? {
+          get {
+            return (resultMap["admin"] as? ResultMap).flatMap { Admin(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "admin")
+          }
+        }
+
+        public var attachmentFilenames: AttachmentFilename? {
+          get {
+            return (resultMap["attachment_filenames"] as? ResultMap).flatMap { AttachmentFilename(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "attachment_filenames")
+          }
+        }
+
+        public var has: String? {
+          get {
+            return resultMap["has"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "has")
+          }
+        }
+
+        public var embedProviders: String? {
+          get {
+            return resultMap["embed_providers"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "embed_providers")
+          }
+        }
+
+        public var embedType: String? {
+          get {
+            return resultMap["embed_type"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "embed_type")
+          }
+        }
+
+        public var parentMessageId: String? {
+          get {
+            return resultMap["parent_message_id"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "parent_message_id")
+          }
+        }
+
+        public var parentMessage: ParentMessage? {
+          get {
+            return (resultMap["parent_message"] as? ResultMap).flatMap { ParentMessage(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "parent_message")
+          }
+        }
+
+        public var isExpress: Bool? {
+          get {
+            return resultMap["isExpress"] as? Bool
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "isExpress")
+          }
+        }
+
+        public var linkHostnames: String? {
+          get {
+            return resultMap["link_hostnames"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "link_hostnames")
+          }
+        }
+
+        public var mentions: [String?]? {
+          get {
+            return resultMap["mentions"] as? [String?]
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "mentions")
+          }
+        }
+
+        public var bytes: Int? {
+          get {
+            return resultMap["bytes"] as? Int
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "bytes")
+          }
+        }
+
+        public var mentionsEveryone: String? {
+          get {
+            return resultMap["mentions_everyone"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "mentions_everyone")
+          }
+        }
+
+        public var content: String? {
+          get {
+            return resultMap["content"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "content")
+          }
+        }
+
+        public var sendedAt: String? {
+          get {
+            return resultMap["sended_at"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "sended_at")
+          }
+        }
+
+        public var createdAt: String? {
+          get {
+            return resultMap["created_at"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "created_at")
+          }
+        }
+
+        public struct Sender: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Sender"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .scalar(String.self)),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("profile", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var id: String? {
+            get {
+              return resultMap["id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var profile: String? {
+            get {
+              return resultMap["profile"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "profile")
+            }
+          }
+        }
+
+        public struct Admin: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Sender"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .scalar(String.self)),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("profile", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var id: String? {
+            get {
+              return resultMap["id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var profile: String? {
+            get {
+              return resultMap["profile"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "profile")
+            }
+          }
+        }
+
+        public struct AttachmentFilename: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Attachment"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("size", type: .scalar(Double.self)),
+              GraphQLField("type", type: .scalar(String.self)),
+              GraphQLField("url", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(name: String? = nil, size: Double? = nil, type: String? = nil, url: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Attachment", "name": name, "size": size, "type": type, "url": url])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var size: Double? {
+            get {
+              return resultMap["size"] as? Double
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "size")
+            }
+          }
+
+          public var type: String? {
+            get {
+              return resultMap["type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "type")
+            }
+          }
+
+          public var url: String? {
+            get {
+              return resultMap["url"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "url")
+            }
+          }
+        }
+
+        public struct ParentMessage: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["MessageParentType"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .scalar(String.self)),
+              GraphQLField("message_id", type: .scalar(String.self)),
+              GraphQLField("channel_id", type: .scalar(String.self)),
+              GraphQLField("sort_id", type: .scalar(String.self)),
+              GraphQLField("message_type", type: .scalar(String.self)),
+              GraphQLField("sender", type: .object(Sender.selections)),
+              GraphQLField("admin", type: .object(Admin.selections)),
+              GraphQLField("attachment_filenames", type: .object(AttachmentFilename.selections)),
+              GraphQLField("has", type: .scalar(String.self)),
+              GraphQLField("embed_providers", type: .scalar(String.self)),
+              GraphQLField("embed_type", type: .scalar(String.self)),
+              GraphQLField("isExpress", type: .scalar(Bool.self)),
+              GraphQLField("link_hostnames", type: .scalar(String.self)),
+              GraphQLField("mentions", type: .list(.scalar(String.self))),
+              GraphQLField("bytes", type: .scalar(Int.self)),
+              GraphQLField("mentions_everyone", type: .scalar(String.self)),
+              GraphQLField("content", type: .scalar(String.self)),
+              GraphQLField("sended_at", type: .scalar(String.self)),
+              GraphQLField("created_at", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: String? = nil, messageId: String? = nil, channelId: String? = nil, sortId: String? = nil, messageType: String? = nil, sender: Sender? = nil, admin: Admin? = nil, attachmentFilenames: AttachmentFilename? = nil, has: String? = nil, embedProviders: String? = nil, embedType: String? = nil, isExpress: Bool? = nil, linkHostnames: String? = nil, mentions: [String?]? = nil, bytes: Int? = nil, mentionsEveryone: String? = nil, content: String? = nil, sendedAt: String? = nil, createdAt: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "MessageParentType", "id": id, "message_id": messageId, "channel_id": channelId, "sort_id": sortId, "message_type": messageType, "sender": sender.flatMap { (value: Sender) -> ResultMap in value.resultMap }, "admin": admin.flatMap { (value: Admin) -> ResultMap in value.resultMap }, "attachment_filenames": attachmentFilenames.flatMap { (value: AttachmentFilename) -> ResultMap in value.resultMap }, "has": has, "embed_providers": embedProviders, "embed_type": embedType, "isExpress": isExpress, "link_hostnames": linkHostnames, "mentions": mentions, "bytes": bytes, "mentions_everyone": mentionsEveryone, "content": content, "sended_at": sendedAt, "created_at": createdAt])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          public var id: String? {
+            get {
+              return resultMap["id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var messageId: String? {
+            get {
+              return resultMap["message_id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "message_id")
+            }
+          }
+
+          public var channelId: String? {
+            get {
+              return resultMap["channel_id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "channel_id")
+            }
+          }
+
+          public var sortId: String? {
+            get {
+              return resultMap["sort_id"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "sort_id")
+            }
+          }
+
+          public var messageType: String? {
+            get {
+              return resultMap["message_type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "message_type")
+            }
+          }
+
+          public var sender: Sender? {
+            get {
+              return (resultMap["sender"] as? ResultMap).flatMap { Sender(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "sender")
+            }
+          }
+
+          public var admin: Admin? {
+            get {
+              return (resultMap["admin"] as? ResultMap).flatMap { Admin(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "admin")
+            }
+          }
+
+          public var attachmentFilenames: AttachmentFilename? {
+            get {
+              return (resultMap["attachment_filenames"] as? ResultMap).flatMap { AttachmentFilename(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "attachment_filenames")
+            }
+          }
+
+          public var has: String? {
+            get {
+              return resultMap["has"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "has")
+            }
+          }
+
+          public var embedProviders: String? {
+            get {
+              return resultMap["embed_providers"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "embed_providers")
+            }
+          }
+
+          public var embedType: String? {
+            get {
+              return resultMap["embed_type"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "embed_type")
+            }
+          }
+
+          public var isExpress: Bool? {
+            get {
+              return resultMap["isExpress"] as? Bool
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "isExpress")
+            }
+          }
+
+          public var linkHostnames: String? {
+            get {
+              return resultMap["link_hostnames"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "link_hostnames")
+            }
+          }
+
+          public var mentions: [String?]? {
+            get {
+              return resultMap["mentions"] as? [String?]
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "mentions")
+            }
+          }
+
+          public var bytes: Int? {
+            get {
+              return resultMap["bytes"] as? Int
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "bytes")
+            }
+          }
+
+          public var mentionsEveryone: String? {
+            get {
+              return resultMap["mentions_everyone"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "mentions_everyone")
+            }
+          }
+
+          public var content: String? {
+            get {
+              return resultMap["content"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "content")
+            }
+          }
+
+          public var sendedAt: String? {
+            get {
+              return resultMap["sended_at"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "sended_at")
+            }
+          }
+
+          public var createdAt: String? {
+            get {
+              return resultMap["created_at"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "created_at")
+            }
+          }
+
+          public struct Sender: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Sender"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .scalar(String.self)),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("profile", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var id: String? {
+              get {
+                return resultMap["id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var profile: String? {
+              get {
+                return resultMap["profile"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "profile")
+              }
+            }
+          }
+
+          public struct Admin: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Sender"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .scalar(String.self)),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("profile", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(id: String? = nil, name: String? = nil, profile: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Sender", "id": id, "name": name, "profile": profile])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var id: String? {
+              get {
+                return resultMap["id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var profile: String? {
+              get {
+                return resultMap["profile"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "profile")
+              }
+            }
+          }
+
+          public struct AttachmentFilename: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Attachment"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("size", type: .scalar(Double.self)),
+                GraphQLField("type", type: .scalar(String.self)),
+                GraphQLField("url", type: .scalar(String.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(name: String? = nil, size: Double? = nil, type: String? = nil, url: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Attachment", "name": name, "size": size, "type": type, "url": url])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var size: Double? {
+              get {
+                return resultMap["size"] as? Double
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "size")
+              }
+            }
+
+            public var type: String? {
+              get {
+                return resultMap["type"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "type")
+              }
+            }
+
+            public var url: String? {
+              get {
+                return resultMap["url"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "url")
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 public final class PinQuery: GraphQLQuery {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
@@ -8865,9 +11675,10 @@ public final class PinQuery: GraphQLQuery {
         id
         project_id
         channel_id
+        message_id
         pinned
         pinnedAt
-        user_id {
+        user {
           __typename
           id
           name
@@ -8932,9 +11743,10 @@ public final class PinQuery: GraphQLQuery {
           GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
           GraphQLField("project_id", type: .nonNull(.scalar(String.self))),
           GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
+          GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
           GraphQLField("pinned", type: .nonNull(.scalar(Bool.self))),
           GraphQLField("pinnedAt", type: .scalar(String.self)),
-          GraphQLField("user_id", type: .object(UserId.selections)),
+          GraphQLField("user", type: .object(User.selections)),
           GraphQLField("expiredAt", type: .scalar(String.self)),
           GraphQLField("createdAt", type: .scalar(String.self)),
         ]
@@ -8946,8 +11758,8 @@ public final class PinQuery: GraphQLQuery {
         self.resultMap = unsafeResultMap
       }
 
-      public init(id: GraphQLID, projectId: String, channelId: String, pinned: Bool, pinnedAt: String? = nil, userId: UserId? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
-        self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "pinned": pinned, "pinnedAt": pinnedAt, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
+      public init(id: GraphQLID, projectId: String, channelId: String, messageId: String, pinned: Bool, pinnedAt: String? = nil, user: User? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
+        self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "message_id": messageId, "pinned": pinned, "pinnedAt": pinnedAt, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
       }
 
       public var __typename: String {
@@ -8987,6 +11799,15 @@ public final class PinQuery: GraphQLQuery {
         }
       }
 
+      public var messageId: String {
+        get {
+          return resultMap["message_id"]! as! String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "message_id")
+        }
+      }
+
       public var pinned: Bool {
         get {
           return resultMap["pinned"]! as! Bool
@@ -9005,12 +11826,12 @@ public final class PinQuery: GraphQLQuery {
         }
       }
 
-      public var userId: UserId? {
+      public var user: User? {
         get {
-          return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+          return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
         }
         set {
-          resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+          resultMap.updateValue(newValue?.resultMap, forKey: "user")
         }
       }
 
@@ -9032,7 +11853,7 @@ public final class PinQuery: GraphQLQuery {
         }
       }
 
-      public struct UserId: GraphQLSelectionSet {
+      public struct User: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Members"]
 
         public static var selections: [GraphQLSelection] {
@@ -9116,9 +11937,10 @@ public final class PinsQuery: GraphQLQuery {
             id
             project_id
             channel_id
+            message_id
             pinned
             pinnedAt
-            user_id {
+            user {
               __typename
               id
               name
@@ -9277,9 +12099,10 @@ public final class PinsQuery: GraphQLQuery {
               GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
               GraphQLField("project_id", type: .nonNull(.scalar(String.self))),
               GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
+              GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
               GraphQLField("pinned", type: .nonNull(.scalar(Bool.self))),
               GraphQLField("pinnedAt", type: .scalar(String.self)),
-              GraphQLField("user_id", type: .object(UserId.selections)),
+              GraphQLField("user", type: .object(User.selections)),
               GraphQLField("expiredAt", type: .scalar(String.self)),
               GraphQLField("createdAt", type: .scalar(String.self)),
             ]
@@ -9291,8 +12114,8 @@ public final class PinsQuery: GraphQLQuery {
             self.resultMap = unsafeResultMap
           }
 
-          public init(id: GraphQLID, projectId: String, channelId: String, pinned: Bool, pinnedAt: String? = nil, userId: UserId? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
-            self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "pinned": pinned, "pinnedAt": pinnedAt, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
+          public init(id: GraphQLID, projectId: String, channelId: String, messageId: String, pinned: Bool, pinnedAt: String? = nil, user: User? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "message_id": messageId, "pinned": pinned, "pinnedAt": pinnedAt, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
           }
 
           public var __typename: String {
@@ -9332,6 +12155,15 @@ public final class PinsQuery: GraphQLQuery {
             }
           }
 
+          public var messageId: String {
+            get {
+              return resultMap["message_id"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "message_id")
+            }
+          }
+
           public var pinned: Bool {
             get {
               return resultMap["pinned"]! as! Bool
@@ -9350,12 +12182,12 @@ public final class PinsQuery: GraphQLQuery {
             }
           }
 
-          public var userId: UserId? {
+          public var user: User? {
             get {
-              return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+              return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
             }
             set {
-              resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+              resultMap.updateValue(newValue?.resultMap, forKey: "user")
             }
           }
 
@@ -9377,7 +12209,7 @@ public final class PinsQuery: GraphQLQuery {
             }
           }
 
-          public struct UserId: GraphQLSelectionSet {
+          public struct User: GraphQLSelectionSet {
             public static let possibleTypes: [String] = ["Members"]
 
             public static var selections: [GraphQLSelection] {
@@ -9446,9 +12278,9 @@ public final class CreatePinMutation: GraphQLMutation {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
     """
-    mutation createPin($projectId: String!, $channelId: String!, $pinned: Boolean!, $pinnedAt: String, $expiredAt: String) {
+    mutation createPin($projectId: String!, $channelId: String!, $messageId: String!, $pinned: Boolean!, $pinnedAt: String, $expiredAt: String) {
       createPin(
-        input: {projectId: $projectId, channelId: $channelId, pinned: $pinned, pinnedAt: $pinnedAt, expiredAt: $expiredAt}
+        input: {projectId: $projectId, channelId: $channelId, messageId: $messageId, pinned: $pinned, pinnedAt: $pinnedAt, expiredAt: $expiredAt}
       ) {
         __typename
         pin {
@@ -9456,9 +12288,10 @@ public final class CreatePinMutation: GraphQLMutation {
           id
           project_id
           channel_id
+          message_id
           pinned
           pinnedAt
-          user_id {
+          user {
             __typename
             id
             name
@@ -9475,20 +12308,22 @@ public final class CreatePinMutation: GraphQLMutation {
 
   public var projectId: String
   public var channelId: String
+  public var messageId: String
   public var pinned: Bool
   public var pinnedAt: String?
   public var expiredAt: String?
 
-  public init(projectId: String, channelId: String, pinned: Bool, pinnedAt: String? = nil, expiredAt: String? = nil) {
+  public init(projectId: String, channelId: String, messageId: String, pinned: Bool, pinnedAt: String? = nil, expiredAt: String? = nil) {
     self.projectId = projectId
     self.channelId = channelId
+    self.messageId = messageId
     self.pinned = pinned
     self.pinnedAt = pinnedAt
     self.expiredAt = expiredAt
   }
 
   public var variables: GraphQLMap? {
-    return ["projectId": projectId, "channelId": channelId, "pinned": pinned, "pinnedAt": pinnedAt, "expiredAt": expiredAt]
+    return ["projectId": projectId, "channelId": channelId, "messageId": messageId, "pinned": pinned, "pinnedAt": pinnedAt, "expiredAt": expiredAt]
   }
 
   public struct Data: GraphQLSelectionSet {
@@ -9496,7 +12331,7 @@ public final class CreatePinMutation: GraphQLMutation {
 
     public static var selections: [GraphQLSelection] {
       return [
-        GraphQLField("createPin", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "channelId": GraphQLVariable("channelId"), "pinned": GraphQLVariable("pinned"), "pinnedAt": GraphQLVariable("pinnedAt"), "expiredAt": GraphQLVariable("expiredAt")]], type: .object(CreatePin.selections)),
+        GraphQLField("createPin", arguments: ["input": ["projectId": GraphQLVariable("projectId"), "channelId": GraphQLVariable("channelId"), "messageId": GraphQLVariable("messageId"), "pinned": GraphQLVariable("pinned"), "pinnedAt": GraphQLVariable("pinnedAt"), "expiredAt": GraphQLVariable("expiredAt")]], type: .object(CreatePin.selections)),
       ]
     }
 
@@ -9567,9 +12402,10 @@ public final class CreatePinMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("project_id", type: .nonNull(.scalar(String.self))),
             GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
             GraphQLField("pinned", type: .nonNull(.scalar(Bool.self))),
             GraphQLField("pinnedAt", type: .scalar(String.self)),
-            GraphQLField("user_id", type: .object(UserId.selections)),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("expiredAt", type: .scalar(String.self)),
             GraphQLField("createdAt", type: .scalar(String.self)),
           ]
@@ -9581,8 +12417,8 @@ public final class CreatePinMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, projectId: String, channelId: String, pinned: Bool, pinnedAt: String? = nil, userId: UserId? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "pinned": pinned, "pinnedAt": pinnedAt, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
+        public init(id: GraphQLID, projectId: String, channelId: String, messageId: String, pinned: Bool, pinnedAt: String? = nil, user: User? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "message_id": messageId, "pinned": pinned, "pinnedAt": pinnedAt, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
         }
 
         public var __typename: String {
@@ -9622,6 +12458,15 @@ public final class CreatePinMutation: GraphQLMutation {
           }
         }
 
+        public var messageId: String {
+          get {
+            return resultMap["message_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "message_id")
+          }
+        }
+
         public var pinned: Bool {
           get {
             return resultMap["pinned"]! as! Bool
@@ -9640,12 +12485,12 @@ public final class CreatePinMutation: GraphQLMutation {
           }
         }
 
-        public var userId: UserId? {
+        public var user: User? {
           get {
-            return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -9667,7 +12512,7 @@ public final class CreatePinMutation: GraphQLMutation {
           }
         }
 
-        public struct UserId: GraphQLSelectionSet {
+        public struct User: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Members"]
 
           public static var selections: [GraphQLSelection] {
@@ -9745,9 +12590,10 @@ public final class UpdatePinMutation: GraphQLMutation {
           id
           project_id
           channel_id
+          message_id
           pinned
           pinnedAt
-          user_id {
+          user {
             __typename
             id
             name
@@ -9858,9 +12704,10 @@ public final class UpdatePinMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("project_id", type: .nonNull(.scalar(String.self))),
             GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("message_id", type: .nonNull(.scalar(String.self))),
             GraphQLField("pinned", type: .nonNull(.scalar(Bool.self))),
             GraphQLField("pinnedAt", type: .scalar(String.self)),
-            GraphQLField("user_id", type: .object(UserId.selections)),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("expiredAt", type: .scalar(String.self)),
             GraphQLField("createdAt", type: .scalar(String.self)),
           ]
@@ -9872,8 +12719,8 @@ public final class UpdatePinMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, projectId: String, channelId: String, pinned: Bool, pinnedAt: String? = nil, userId: UserId? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "pinned": pinned, "pinnedAt": pinnedAt, "user_id": userId.flatMap { (value: UserId) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
+        public init(id: GraphQLID, projectId: String, channelId: String, messageId: String, pinned: Bool, pinnedAt: String? = nil, user: User? = nil, expiredAt: String? = nil, createdAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Pin", "id": id, "project_id": projectId, "channel_id": channelId, "message_id": messageId, "pinned": pinned, "pinnedAt": pinnedAt, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "expiredAt": expiredAt, "createdAt": createdAt])
         }
 
         public var __typename: String {
@@ -9913,6 +12760,15 @@ public final class UpdatePinMutation: GraphQLMutation {
           }
         }
 
+        public var messageId: String {
+          get {
+            return resultMap["message_id"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "message_id")
+          }
+        }
+
         public var pinned: Bool {
           get {
             return resultMap["pinned"]! as! Bool
@@ -9931,12 +12787,12 @@ public final class UpdatePinMutation: GraphQLMutation {
           }
         }
 
-        public var userId: UserId? {
+        public var user: User? {
           get {
-            return (resultMap["user_id"] as? ResultMap).flatMap { UserId(unsafeResultMap: $0) }
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
           }
           set {
-            resultMap.updateValue(newValue?.resultMap, forKey: "user_id")
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -9958,7 +12814,7 @@ public final class UpdatePinMutation: GraphQLMutation {
           }
         }
 
-        public struct UserId: GraphQLSelectionSet {
+        public struct User: GraphQLSelectionSet {
           public static let possibleTypes: [String] = ["Members"]
 
           public static var selections: [GraphQLSelection] {
@@ -10026,8 +12882,8 @@ public final class ProjectQuery: GraphQLQuery {
   /// The raw GraphQL definition of this operation.
   public let operationDefinition: String =
     """
-    query project($id: ID!) {
-      project(id: $id) {
+    query project($id: ID!, $ncpId: String!) {
+      project(id: $id, ncpId: $ncpId) {
         __typename
         ncp_project_id
         name
@@ -10038,13 +12894,15 @@ public final class ProjectQuery: GraphQLQuery {
   public let operationName: String = "project"
 
   public var id: GraphQLID
+  public var ncpId: String
 
-  public init(id: GraphQLID) {
+  public init(id: GraphQLID, ncpId: String) {
     self.id = id
+    self.ncpId = ncpId
   }
 
   public var variables: GraphQLMap? {
-    return ["id": id]
+    return ["id": id, "ncpId": ncpId]
   }
 
   public struct Data: GraphQLSelectionSet {
@@ -10052,7 +12910,7 @@ public final class ProjectQuery: GraphQLQuery {
 
     public static var selections: [GraphQLSelection] {
       return [
-        GraphQLField("project", arguments: ["id": GraphQLVariable("id")], type: .object(Project.selections)),
+        GraphQLField("project", arguments: ["id": GraphQLVariable("id"), "ncpId": GraphQLVariable("ncpId")], type: .object(Project.selections)),
       ]
     }
 
@@ -10140,6 +12998,13 @@ public final class CreateSubscriptionMutation: GraphQLMutation {
           id
           channel_id
           user_id
+          user {
+            __typename
+            id
+            name
+            profile
+            customField
+          }
           language
           push
           mute
@@ -10259,6 +13124,7 @@ public final class CreateSubscriptionMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
             GraphQLField("user_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("language", type: .scalar(String.self)),
             GraphQLField("push", type: .scalar(Bool.self)),
             GraphQLField("mute", type: .scalar(Bool.self)),
@@ -10277,8 +13143,8 @@ public final class CreateSubscriptionMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, channelId: String, userId: String, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
+        public init(id: GraphQLID, channelId: String, userId: String, user: User? = nil, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
         }
 
         public var __typename: String {
@@ -10315,6 +13181,15 @@ public final class CreateSubscriptionMutation: GraphQLMutation {
           }
           set {
             resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -10396,6 +13271,76 @@ public final class CreateSubscriptionMutation: GraphQLMutation {
           }
           set {
             resultMap.updateValue(newValue, forKey: "updated_at")
+          }
+        }
+
+        public struct User: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Members"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("profile", type: .scalar(String.self)),
+              GraphQLField("customField", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: GraphQLID, name: String? = nil, profile: String? = nil, customField: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Members", "id": id, "name": name, "profile": profile, "customField": customField])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          /// The ID of an object
+          public var id: GraphQLID {
+            get {
+              return resultMap["id"]! as! GraphQLID
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var profile: String? {
+            get {
+              return resultMap["profile"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "profile")
+            }
+          }
+
+          public var customField: String? {
+            get {
+              return resultMap["customField"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "customField")
+            }
           }
         }
 
@@ -10563,6 +13508,13 @@ public final class DeleteSubscriptionMutation: GraphQLMutation {
           id
           channel_id
           user_id
+          user {
+            __typename
+            id
+            name
+            profile
+            customField
+          }
           language
           push
           mute
@@ -10680,6 +13632,7 @@ public final class DeleteSubscriptionMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
             GraphQLField("user_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("language", type: .scalar(String.self)),
             GraphQLField("push", type: .scalar(Bool.self)),
             GraphQLField("mute", type: .scalar(Bool.self)),
@@ -10698,8 +13651,8 @@ public final class DeleteSubscriptionMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, channelId: String, userId: String, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
+        public init(id: GraphQLID, channelId: String, userId: String, user: User? = nil, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
         }
 
         public var __typename: String {
@@ -10736,6 +13689,15 @@ public final class DeleteSubscriptionMutation: GraphQLMutation {
           }
           set {
             resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -10817,6 +13779,76 @@ public final class DeleteSubscriptionMutation: GraphQLMutation {
           }
           set {
             resultMap.updateValue(newValue, forKey: "updated_at")
+          }
+        }
+
+        public struct User: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Members"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("profile", type: .scalar(String.self)),
+              GraphQLField("customField", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: GraphQLID, name: String? = nil, profile: String? = nil, customField: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Members", "id": id, "name": name, "profile": profile, "customField": customField])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          /// The ID of an object
+          public var id: GraphQLID {
+            get {
+              return resultMap["id"]! as! GraphQLID
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var profile: String? {
+            get {
+              return resultMap["profile"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "profile")
+            }
+          }
+
+          public var customField: String? {
+            get {
+              return resultMap["customField"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "customField")
+            }
           }
         }
 
@@ -10986,6 +14018,13 @@ public final class UpdateSubscriptionMutation: GraphQLMutation {
           id
           channel_id
           user_id
+          user {
+            __typename
+            id
+            name
+            profile
+            customField
+          }
           language
           push
           mute
@@ -11107,6 +14146,7 @@ public final class UpdateSubscriptionMutation: GraphQLMutation {
             GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
             GraphQLField("user_id", type: .nonNull(.scalar(String.self))),
+            GraphQLField("user", type: .object(User.selections)),
             GraphQLField("language", type: .scalar(String.self)),
             GraphQLField("push", type: .scalar(Bool.self)),
             GraphQLField("mute", type: .scalar(Bool.self)),
@@ -11125,8 +14165,8 @@ public final class UpdateSubscriptionMutation: GraphQLMutation {
           self.resultMap = unsafeResultMap
         }
 
-        public init(id: GraphQLID, channelId: String, userId: String, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
+        public init(id: GraphQLID, channelId: String, userId: String, user: User? = nil, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
         }
 
         public var __typename: String {
@@ -11163,6 +14203,15 @@ public final class UpdateSubscriptionMutation: GraphQLMutation {
           }
           set {
             resultMap.updateValue(newValue, forKey: "user_id")
+          }
+        }
+
+        public var user: User? {
+          get {
+            return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
+          }
+          set {
+            resultMap.updateValue(newValue?.resultMap, forKey: "user")
           }
         }
 
@@ -11244,6 +14293,76 @@ public final class UpdateSubscriptionMutation: GraphQLMutation {
           }
           set {
             resultMap.updateValue(newValue, forKey: "updated_at")
+          }
+        }
+
+        public struct User: GraphQLSelectionSet {
+          public static let possibleTypes: [String] = ["Members"]
+
+          public static var selections: [GraphQLSelection] {
+            return [
+              GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+              GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
+              GraphQLField("name", type: .scalar(String.self)),
+              GraphQLField("profile", type: .scalar(String.self)),
+              GraphQLField("customField", type: .scalar(String.self)),
+            ]
+          }
+
+          public private(set) var resultMap: ResultMap
+
+          public init(unsafeResultMap: ResultMap) {
+            self.resultMap = unsafeResultMap
+          }
+
+          public init(id: GraphQLID, name: String? = nil, profile: String? = nil, customField: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Members", "id": id, "name": name, "profile": profile, "customField": customField])
+          }
+
+          public var __typename: String {
+            get {
+              return resultMap["__typename"]! as! String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "__typename")
+            }
+          }
+
+          /// The ID of an object
+          public var id: GraphQLID {
+            get {
+              return resultMap["id"]! as! GraphQLID
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "id")
+            }
+          }
+
+          public var name: String? {
+            get {
+              return resultMap["name"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "name")
+            }
+          }
+
+          public var profile: String? {
+            get {
+              return resultMap["profile"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "profile")
+            }
+          }
+
+          public var customField: String? {
+            get {
+              return resultMap["customField"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "customField")
+            }
           }
         }
 
@@ -11407,23 +14526,37 @@ public final class SubscriptionQuery: GraphQLQuery {
       subscription(projectId: $projectId, channelId: $channelId, id: $id) {
         __typename
         id
+        channel_id
+        user_id
         user {
           __typename
+          id
           name
           profile
-          country
+          customField
+        }
+        language
+        push
+        mute
+        online
+        channel {
+          __typename
+          name
+          type
+          image_url
+          push
+          disabled
         }
         mark {
           __typename
           user_id
           message_id
           sort_id
+          unread
         }
-        channel_id
-        user_id
-        online
-        push
+        uniquekey
         created_at
+        updated_at
       }
     }
     """
@@ -11479,13 +14612,18 @@ public final class SubscriptionQuery: GraphQLQuery {
         return [
           GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
           GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-          GraphQLField("user", type: .object(User.selections)),
-          GraphQLField("mark", type: .object(Mark.selections)),
           GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
           GraphQLField("user_id", type: .nonNull(.scalar(String.self))),
-          GraphQLField("online", type: .scalar(Bool.self)),
+          GraphQLField("user", type: .object(User.selections)),
+          GraphQLField("language", type: .scalar(String.self)),
           GraphQLField("push", type: .scalar(Bool.self)),
+          GraphQLField("mute", type: .scalar(Bool.self)),
+          GraphQLField("online", type: .scalar(Bool.self)),
+          GraphQLField("channel", type: .object(Channel.selections)),
+          GraphQLField("mark", type: .object(Mark.selections)),
+          GraphQLField("uniquekey", type: .scalar(String.self)),
           GraphQLField("created_at", type: .scalar(String.self)),
+          GraphQLField("updated_at", type: .scalar(String.self)),
         ]
       }
 
@@ -11495,8 +14633,8 @@ public final class SubscriptionQuery: GraphQLQuery {
         self.resultMap = unsafeResultMap
       }
 
-      public init(id: GraphQLID, user: User? = nil, mark: Mark? = nil, channelId: String, userId: String, online: Bool? = nil, push: Bool? = nil, createdAt: String? = nil) {
-        self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "channel_id": channelId, "user_id": userId, "online": online, "push": push, "created_at": createdAt])
+      public init(id: GraphQLID, channelId: String, userId: String, user: User? = nil, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+        self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
       }
 
       public var __typename: String {
@@ -11518,24 +14656,6 @@ public final class SubscriptionQuery: GraphQLQuery {
         }
       }
 
-      public var user: User? {
-        get {
-          return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
-        }
-        set {
-          resultMap.updateValue(newValue?.resultMap, forKey: "user")
-        }
-      }
-
-      public var mark: Mark? {
-        get {
-          return (resultMap["mark"] as? ResultMap).flatMap { Mark(unsafeResultMap: $0) }
-        }
-        set {
-          resultMap.updateValue(newValue?.resultMap, forKey: "mark")
-        }
-      }
-
       public var channelId: String {
         get {
           return resultMap["channel_id"]! as! String
@@ -11554,12 +14674,21 @@ public final class SubscriptionQuery: GraphQLQuery {
         }
       }
 
-      public var online: Bool? {
+      public var user: User? {
         get {
-          return resultMap["online"] as? Bool
+          return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
         }
         set {
-          resultMap.updateValue(newValue, forKey: "online")
+          resultMap.updateValue(newValue?.resultMap, forKey: "user")
+        }
+      }
+
+      public var language: String? {
+        get {
+          return resultMap["language"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "language")
         }
       }
 
@@ -11572,6 +14701,51 @@ public final class SubscriptionQuery: GraphQLQuery {
         }
       }
 
+      public var mute: Bool? {
+        get {
+          return resultMap["mute"] as? Bool
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "mute")
+        }
+      }
+
+      public var online: Bool? {
+        get {
+          return resultMap["online"] as? Bool
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "online")
+        }
+      }
+
+      public var channel: Channel? {
+        get {
+          return (resultMap["channel"] as? ResultMap).flatMap { Channel(unsafeResultMap: $0) }
+        }
+        set {
+          resultMap.updateValue(newValue?.resultMap, forKey: "channel")
+        }
+      }
+
+      public var mark: Mark? {
+        get {
+          return (resultMap["mark"] as? ResultMap).flatMap { Mark(unsafeResultMap: $0) }
+        }
+        set {
+          resultMap.updateValue(newValue?.resultMap, forKey: "mark")
+        }
+      }
+
+      public var uniquekey: String? {
+        get {
+          return resultMap["uniquekey"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "uniquekey")
+        }
+      }
+
       public var createdAt: String? {
         get {
           return resultMap["created_at"] as? String
@@ -11581,15 +14755,25 @@ public final class SubscriptionQuery: GraphQLQuery {
         }
       }
 
+      public var updatedAt: String? {
+        get {
+          return resultMap["updated_at"] as? String
+        }
+        set {
+          resultMap.updateValue(newValue, forKey: "updated_at")
+        }
+      }
+
       public struct User: GraphQLSelectionSet {
         public static let possibleTypes: [String] = ["Members"]
 
         public static var selections: [GraphQLSelection] {
           return [
             GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
             GraphQLField("name", type: .scalar(String.self)),
             GraphQLField("profile", type: .scalar(String.self)),
-            GraphQLField("country", type: .scalar(String.self)),
+            GraphQLField("customField", type: .scalar(String.self)),
           ]
         }
 
@@ -11599,8 +14783,8 @@ public final class SubscriptionQuery: GraphQLQuery {
           self.resultMap = unsafeResultMap
         }
 
-        public init(name: String? = nil, profile: String? = nil, country: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Members", "name": name, "profile": profile, "country": country])
+        public init(id: GraphQLID, name: String? = nil, profile: String? = nil, customField: String? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Members", "id": id, "name": name, "profile": profile, "customField": customField])
         }
 
         public var __typename: String {
@@ -11609,6 +14793,16 @@ public final class SubscriptionQuery: GraphQLQuery {
           }
           set {
             resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        /// The ID of an object
+        public var id: GraphQLID {
+          get {
+            return resultMap["id"]! as! GraphQLID
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "id")
           }
         }
 
@@ -11630,12 +14824,91 @@ public final class SubscriptionQuery: GraphQLQuery {
           }
         }
 
-        public var country: String? {
+        public var customField: String? {
           get {
-            return resultMap["country"] as? String
+            return resultMap["customField"] as? String
           }
           set {
-            resultMap.updateValue(newValue, forKey: "country")
+            resultMap.updateValue(newValue, forKey: "customField")
+          }
+        }
+      }
+
+      public struct Channel: GraphQLSelectionSet {
+        public static let possibleTypes: [String] = ["Channels"]
+
+        public static var selections: [GraphQLSelection] {
+          return [
+            GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+            GraphQLField("name", type: .scalar(String.self)),
+            GraphQLField("type", type: .scalar(String.self)),
+            GraphQLField("image_url", type: .scalar(String.self)),
+            GraphQLField("push", type: .scalar(Bool.self)),
+            GraphQLField("disabled", type: .scalar(Bool.self)),
+          ]
+        }
+
+        public private(set) var resultMap: ResultMap
+
+        public init(unsafeResultMap: ResultMap) {
+          self.resultMap = unsafeResultMap
+        }
+
+        public init(name: String? = nil, type: String? = nil, imageUrl: String? = nil, push: Bool? = nil, disabled: Bool? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Channels", "name": name, "type": type, "image_url": imageUrl, "push": push, "disabled": disabled])
+        }
+
+        public var __typename: String {
+          get {
+            return resultMap["__typename"]! as! String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "__typename")
+          }
+        }
+
+        public var name: String? {
+          get {
+            return resultMap["name"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "name")
+          }
+        }
+
+        public var type: String? {
+          get {
+            return resultMap["type"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "type")
+          }
+        }
+
+        public var imageUrl: String? {
+          get {
+            return resultMap["image_url"] as? String
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "image_url")
+          }
+        }
+
+        public var push: Bool? {
+          get {
+            return resultMap["push"] as? Bool
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "push")
+          }
+        }
+
+        public var disabled: Bool? {
+          get {
+            return resultMap["disabled"] as? Bool
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "disabled")
           }
         }
       }
@@ -11649,6 +14922,7 @@ public final class SubscriptionQuery: GraphQLQuery {
             GraphQLField("user_id", type: .scalar(String.self)),
             GraphQLField("message_id", type: .scalar(String.self)),
             GraphQLField("sort_id", type: .scalar(String.self)),
+            GraphQLField("unread", type: .scalar(Int.self)),
           ]
         }
 
@@ -11658,8 +14932,8 @@ public final class SubscriptionQuery: GraphQLQuery {
           self.resultMap = unsafeResultMap
         }
 
-        public init(userId: String? = nil, messageId: String? = nil, sortId: String? = nil) {
-          self.init(unsafeResultMap: ["__typename": "Mark", "user_id": userId, "message_id": messageId, "sort_id": sortId])
+        public init(userId: String? = nil, messageId: String? = nil, sortId: String? = nil, unread: Int? = nil) {
+          self.init(unsafeResultMap: ["__typename": "Mark", "user_id": userId, "message_id": messageId, "sort_id": sortId, "unread": unread])
         }
 
         public var __typename: String {
@@ -11697,6 +14971,15 @@ public final class SubscriptionQuery: GraphQLQuery {
             resultMap.updateValue(newValue, forKey: "sort_id")
           }
         }
+
+        public var unread: Int? {
+          get {
+            return resultMap["unread"] as? Int
+          }
+          set {
+            resultMap.updateValue(newValue, forKey: "unread")
+          }
+        }
       }
     }
   }
@@ -11720,17 +15003,37 @@ public final class SubscriptionsQuery: GraphQLQuery {
           node {
             __typename
             id
-            user {
-              __typename
-              name
-              profile
-              country
-            }
             channel_id
             user_id
-            online
+            user {
+              __typename
+              id
+              name
+              profile
+              customField
+            }
+            language
             push
+            mute
+            online
+            channel {
+              __typename
+              name
+              type
+              image_url
+              push
+              disabled
+            }
+            mark {
+              __typename
+              user_id
+              message_id
+              sort_id
+              unread
+            }
+            uniquekey
             created_at
+            updated_at
           }
         }
       }
@@ -11878,12 +15181,18 @@ public final class SubscriptionsQuery: GraphQLQuery {
             return [
               GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
               GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
-              GraphQLField("user", type: .object(User.selections)),
               GraphQLField("channel_id", type: .nonNull(.scalar(String.self))),
               GraphQLField("user_id", type: .nonNull(.scalar(String.self))),
-              GraphQLField("online", type: .scalar(Bool.self)),
+              GraphQLField("user", type: .object(User.selections)),
+              GraphQLField("language", type: .scalar(String.self)),
               GraphQLField("push", type: .scalar(Bool.self)),
+              GraphQLField("mute", type: .scalar(Bool.self)),
+              GraphQLField("online", type: .scalar(Bool.self)),
+              GraphQLField("channel", type: .object(Channel.selections)),
+              GraphQLField("mark", type: .object(Mark.selections)),
+              GraphQLField("uniquekey", type: .scalar(String.self)),
               GraphQLField("created_at", type: .scalar(String.self)),
+              GraphQLField("updated_at", type: .scalar(String.self)),
             ]
           }
 
@@ -11893,8 +15202,8 @@ public final class SubscriptionsQuery: GraphQLQuery {
             self.resultMap = unsafeResultMap
           }
 
-          public init(id: GraphQLID, user: User? = nil, channelId: String, userId: String, online: Bool? = nil, push: Bool? = nil, createdAt: String? = nil) {
-            self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "channel_id": channelId, "user_id": userId, "online": online, "push": push, "created_at": createdAt])
+          public init(id: GraphQLID, channelId: String, userId: String, user: User? = nil, language: String? = nil, push: Bool? = nil, mute: Bool? = nil, online: Bool? = nil, channel: Channel? = nil, mark: Mark? = nil, uniquekey: String? = nil, createdAt: String? = nil, updatedAt: String? = nil) {
+            self.init(unsafeResultMap: ["__typename": "Subscription", "id": id, "channel_id": channelId, "user_id": userId, "user": user.flatMap { (value: User) -> ResultMap in value.resultMap }, "language": language, "push": push, "mute": mute, "online": online, "channel": channel.flatMap { (value: Channel) -> ResultMap in value.resultMap }, "mark": mark.flatMap { (value: Mark) -> ResultMap in value.resultMap }, "uniquekey": uniquekey, "created_at": createdAt, "updated_at": updatedAt])
           }
 
           public var __typename: String {
@@ -11916,15 +15225,6 @@ public final class SubscriptionsQuery: GraphQLQuery {
             }
           }
 
-          public var user: User? {
-            get {
-              return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
-            }
-            set {
-              resultMap.updateValue(newValue?.resultMap, forKey: "user")
-            }
-          }
-
           public var channelId: String {
             get {
               return resultMap["channel_id"]! as! String
@@ -11943,12 +15243,21 @@ public final class SubscriptionsQuery: GraphQLQuery {
             }
           }
 
-          public var online: Bool? {
+          public var user: User? {
             get {
-              return resultMap["online"] as? Bool
+              return (resultMap["user"] as? ResultMap).flatMap { User(unsafeResultMap: $0) }
             }
             set {
-              resultMap.updateValue(newValue, forKey: "online")
+              resultMap.updateValue(newValue?.resultMap, forKey: "user")
+            }
+          }
+
+          public var language: String? {
+            get {
+              return resultMap["language"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "language")
             }
           }
 
@@ -11961,6 +15270,51 @@ public final class SubscriptionsQuery: GraphQLQuery {
             }
           }
 
+          public var mute: Bool? {
+            get {
+              return resultMap["mute"] as? Bool
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "mute")
+            }
+          }
+
+          public var online: Bool? {
+            get {
+              return resultMap["online"] as? Bool
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "online")
+            }
+          }
+
+          public var channel: Channel? {
+            get {
+              return (resultMap["channel"] as? ResultMap).flatMap { Channel(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "channel")
+            }
+          }
+
+          public var mark: Mark? {
+            get {
+              return (resultMap["mark"] as? ResultMap).flatMap { Mark(unsafeResultMap: $0) }
+            }
+            set {
+              resultMap.updateValue(newValue?.resultMap, forKey: "mark")
+            }
+          }
+
+          public var uniquekey: String? {
+            get {
+              return resultMap["uniquekey"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "uniquekey")
+            }
+          }
+
           public var createdAt: String? {
             get {
               return resultMap["created_at"] as? String
@@ -11970,15 +15324,25 @@ public final class SubscriptionsQuery: GraphQLQuery {
             }
           }
 
+          public var updatedAt: String? {
+            get {
+              return resultMap["updated_at"] as? String
+            }
+            set {
+              resultMap.updateValue(newValue, forKey: "updated_at")
+            }
+          }
+
           public struct User: GraphQLSelectionSet {
             public static let possibleTypes: [String] = ["Members"]
 
             public static var selections: [GraphQLSelection] {
               return [
                 GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("id", type: .nonNull(.scalar(GraphQLID.self))),
                 GraphQLField("name", type: .scalar(String.self)),
                 GraphQLField("profile", type: .scalar(String.self)),
-                GraphQLField("country", type: .scalar(String.self)),
+                GraphQLField("customField", type: .scalar(String.self)),
               ]
             }
 
@@ -11988,8 +15352,8 @@ public final class SubscriptionsQuery: GraphQLQuery {
               self.resultMap = unsafeResultMap
             }
 
-            public init(name: String? = nil, profile: String? = nil, country: String? = nil) {
-              self.init(unsafeResultMap: ["__typename": "Members", "name": name, "profile": profile, "country": country])
+            public init(id: GraphQLID, name: String? = nil, profile: String? = nil, customField: String? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Members", "id": id, "name": name, "profile": profile, "customField": customField])
             }
 
             public var __typename: String {
@@ -11998,6 +15362,16 @@ public final class SubscriptionsQuery: GraphQLQuery {
               }
               set {
                 resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            /// The ID of an object
+            public var id: GraphQLID {
+              get {
+                return resultMap["id"]! as! GraphQLID
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "id")
               }
             }
 
@@ -12019,12 +15393,160 @@ public final class SubscriptionsQuery: GraphQLQuery {
               }
             }
 
-            public var country: String? {
+            public var customField: String? {
               get {
-                return resultMap["country"] as? String
+                return resultMap["customField"] as? String
               }
               set {
-                resultMap.updateValue(newValue, forKey: "country")
+                resultMap.updateValue(newValue, forKey: "customField")
+              }
+            }
+          }
+
+          public struct Channel: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Channels"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("name", type: .scalar(String.self)),
+                GraphQLField("type", type: .scalar(String.self)),
+                GraphQLField("image_url", type: .scalar(String.self)),
+                GraphQLField("push", type: .scalar(Bool.self)),
+                GraphQLField("disabled", type: .scalar(Bool.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(name: String? = nil, type: String? = nil, imageUrl: String? = nil, push: Bool? = nil, disabled: Bool? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Channels", "name": name, "type": type, "image_url": imageUrl, "push": push, "disabled": disabled])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var name: String? {
+              get {
+                return resultMap["name"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "name")
+              }
+            }
+
+            public var type: String? {
+              get {
+                return resultMap["type"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "type")
+              }
+            }
+
+            public var imageUrl: String? {
+              get {
+                return resultMap["image_url"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "image_url")
+              }
+            }
+
+            public var push: Bool? {
+              get {
+                return resultMap["push"] as? Bool
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "push")
+              }
+            }
+
+            public var disabled: Bool? {
+              get {
+                return resultMap["disabled"] as? Bool
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "disabled")
+              }
+            }
+          }
+
+          public struct Mark: GraphQLSelectionSet {
+            public static let possibleTypes: [String] = ["Mark"]
+
+            public static var selections: [GraphQLSelection] {
+              return [
+                GraphQLField("__typename", type: .nonNull(.scalar(String.self))),
+                GraphQLField("user_id", type: .scalar(String.self)),
+                GraphQLField("message_id", type: .scalar(String.self)),
+                GraphQLField("sort_id", type: .scalar(String.self)),
+                GraphQLField("unread", type: .scalar(Int.self)),
+              ]
+            }
+
+            public private(set) var resultMap: ResultMap
+
+            public init(unsafeResultMap: ResultMap) {
+              self.resultMap = unsafeResultMap
+            }
+
+            public init(userId: String? = nil, messageId: String? = nil, sortId: String? = nil, unread: Int? = nil) {
+              self.init(unsafeResultMap: ["__typename": "Mark", "user_id": userId, "message_id": messageId, "sort_id": sortId, "unread": unread])
+            }
+
+            public var __typename: String {
+              get {
+                return resultMap["__typename"]! as! String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "__typename")
+              }
+            }
+
+            public var userId: String? {
+              get {
+                return resultMap["user_id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "user_id")
+              }
+            }
+
+            public var messageId: String? {
+              get {
+                return resultMap["message_id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "message_id")
+              }
+            }
+
+            public var sortId: String? {
+              get {
+                return resultMap["sort_id"] as? String
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "sort_id")
+              }
+            }
+
+            public var unread: Int? {
+              get {
+                return resultMap["unread"] as? Int
+              }
+              set {
+                resultMap.updateValue(newValue, forKey: "unread")
               }
             }
           }

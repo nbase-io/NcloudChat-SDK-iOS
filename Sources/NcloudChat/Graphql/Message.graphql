@@ -22,8 +22,56 @@ query message (
         admin {
             id
             name
+            profile
         }
+        attachment_filenames {
+            name
+            size
+            type
+            url
+        }
+        has
+        embed_providers
+        embed_type
+        parent_message_id
+        parent_message {
+            id
+            message_id
+            channel_id
+            sort_id
+            message_type
+            sender {
+                id
+                name
+                profile
+            }
+            admin {
+                id
+                name
+                profile
+            }
+            attachment_filenames {
+                name
+                size
+                type
+                url
+            }
+            has
+            embed_providers
+            embed_type
+            isExpress
+            link_hostnames
+            mentions
+            bytes
+            mentions_everyone
+            content
+            sended_at
+            created_at
+        }
+        isExpress
+        link_hostnames
         mentions
+        bytes
         mentions_everyone
         content
         sended_at
@@ -59,8 +107,56 @@ query messages (
                 admin {
                     id
                     name
+                    profile
                 }
+                attachment_filenames {
+                    name
+                    size
+                    type
+                    url
+                }
+                has
+                embed_providers
+                embed_type
+                parent_message_id
+                parent_message {
+                    id
+                    message_id
+                    channel_id
+                    sort_id
+                    message_type
+                    sender {
+                        id
+                        name
+                        profile
+                    }
+                    admin {
+                        id
+                        name
+                        profile
+                    }
+                    attachment_filenames {
+                        name
+                        size
+                        type
+                        url
+                    }
+                    has
+                    embed_providers
+                    embed_type
+                    isExpress
+                    link_hostnames
+                    mentions
+                    bytes
+                    mentions_everyone
+                    content
+                    sended_at
+                    created_at
+                }
+                isExpress
+                link_hostnames
                 mentions
+                bytes
                 mentions_everyone
                 content
                 sended_at
@@ -122,6 +218,41 @@ mutation createChannelMessage (
             has
             embed_providers
             embed_type
+            parent_message_id
+            parent_message {
+                id
+                message_id
+                channel_id
+                sort_id
+                message_type
+                sender {
+                    id
+                    name
+                    profile
+                }
+                admin {
+                    id
+                    name
+                    profile
+                }
+                attachment_filenames {
+                    name
+                    size
+                    type
+                    url
+                }
+                has
+                embed_providers
+                embed_type
+                isExpress
+                link_hostnames
+                mentions
+                bytes
+                mentions_everyone
+                content
+                sended_at
+                created_at
+            }
             isExpress
             link_hostnames
             mentions
@@ -133,3 +264,87 @@ mutation createChannelMessage (
         }
     }
 }
+
+mutation deleteMessage (
+    $projectId: String!
+    $channelId: String!
+    $id: ID!
+    ) {
+        deleteMessage(
+            input: {
+                projectId: $projectId
+                channelId: $channelId
+                id: $id
+            }
+        ) {
+            message {
+                id
+                message_id
+                channel_id
+                sort_id
+                message_type
+                sender {
+                    id
+                    name
+                    profile
+                }
+                admin {
+                    id
+                    name
+                    profile
+                }
+                attachment_filenames {
+                    name
+                    size
+                    type
+                    url
+                }
+                has
+                embed_providers
+                embed_type
+                parent_message_id
+                parent_message {
+                    id
+                    message_id
+                    channel_id
+                    sort_id
+                    message_type
+                    sender {
+                        id
+                        name
+                        profile
+                    }
+                    admin {
+                        id
+                        name
+                        profile
+                    }
+                    attachment_filenames {
+                        name
+                        size
+                        type
+                        url
+                    }
+                    has
+                    embed_providers
+                    embed_type
+                    isExpress
+                    link_hostnames
+                    mentions
+                    bytes
+                    mentions_everyone
+                    content
+                    sended_at
+                    created_at
+                }
+                isExpress
+                link_hostnames
+                mentions
+                bytes
+                mentions_everyone
+                content
+                sended_at
+                created_at
+            }
+        }
+    }

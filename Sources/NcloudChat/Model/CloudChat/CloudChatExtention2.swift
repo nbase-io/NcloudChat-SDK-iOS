@@ -28,8 +28,8 @@ extension CloudChat {
                     return
                 }
                 data.id = data.id.toDecodedId()
-                if let userId = data.userId?.id {
-                    data.userId?.id = userId.toDecodedId()
+                if let userId = data.user?.id {
+                    data.user?.id = userId.toDecodedId()
                 }
                 completionHandler(.success(data.resultMap.jsonValue))
             case .failure(let error):
@@ -60,8 +60,8 @@ extension CloudChat {
                         return
                     }
                 data.id = data.id.toDecodedId()
-                if let userId = data.userId?.id {
-                    data.userId?.id = userId.toDecodedId()
+                if let userId = data.user?.id {
+                    data.user?.id = userId.toDecodedId()
                 }
                 completionHandler(.success(data.resultMap.jsonValue))
             case .failure(let error):

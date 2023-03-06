@@ -1,9 +1,10 @@
-query channel($id: String, $projectId: String!, $uniqueId: String) {
-    channel(projectId: $projectId, id:$id, uniqueId:$uniqueId) {
+query channel($id: String, $projectId: String!) {
+    channel(projectId: $projectId, id:$id) {
         id
         project_id
         name
-        user_id {
+        user_id
+        user {
             id
             name
             profile
@@ -20,26 +21,26 @@ query channel($id: String, $projectId: String!, $uniqueId: String) {
         created_at
         updated_at
         last_message {
-        message_id
-        sort_id
-        project_id
-        channel_id
-        message_type
-        mentions
-        mentions_everyone
-        has
-        sender {
-            id
-            name
-            profile
-        }
-        admin {
-            id
-            name
-            profile
-        }
-        content
-        created_at
+            message_id
+            sort_id
+            project_id
+            channel_id
+            message_type
+            mentions
+            mentions_everyone
+            has
+            sender {
+                id
+                name
+                profile
+            }
+            admin {
+                id
+                name
+                profile
+            }
+            content
+            created_at
         }
     }
 }
@@ -52,7 +53,8 @@ query channels($projectId: String!, $filter: String!, $sort: String, $option:Str
                 id
                 project_id
                 name
-                user_id {
+                user_id
+                user {
                     id
                     name
                     profile
@@ -97,40 +99,41 @@ query channels($projectId: String!, $filter: String!, $sort: String, $option:Str
 
 
 mutation createChannel(
+    $id: String,
     $projectId: String!,
     $name: String!,
     $type: String!,
     $uniqueId: String,
-    $members: [String],
-    $customField: String,
-    $disabled: Boolean,
-    $mutes: Boolean,
+    $translation: Boolean,
     $push: Boolean,
+    $mutes: Boolean,
+    $linkUrl: String,
     $imageUrl: String,
-    $id: String,
-    $translation: Boolean
+    $customField: String,
+    $members: [String]
     ) {
     createChannel(
         input: {
+            id: $id,
             projectId: $projectId,
             name: $name,
             type: $type,
-            members: $members,
             uniqueId: $uniqueId,
-            customField: $customField,
-            disabled: $disabled,
+            translation:$translation,
+            push:$push,
             mutes: $mutes,
-            push: $push,
-            imageUrl: $imageUrl,
-            id: $id,
-            translation: $translation
+            customField: $customField,
+            linkUrl:$linkUrl,
+            imageUrl:$imageUrl
+            members: $members,
         }
     ) {
         channel {
             id
             project_id
             name
-            user_id {
+            user_id
+            user {
                 id
                 name
                 profile
@@ -179,7 +182,9 @@ mutation updateChannel(
     $uniqueId: String,
     $translation: Boolean,
     $push: Boolean,
+    $linkUrl: String,
     $imageUrl: String,
+    $customField: String,
     $id: ID!,
     $members: [String]
     ) {
@@ -193,6 +198,8 @@ mutation updateChannel(
             uniqueId: $uniqueId,
             translation:$translation,
             push:$push,
+            customField:$customField,
+            linkUrl:$linkUrl,
             imageUrl:$imageUrl
         }
     ) {
@@ -200,7 +207,8 @@ mutation updateChannel(
             id
             project_id
             name
-            user_id {
+            user_id
+            user {
                 id
                 name
                 profile
@@ -256,7 +264,8 @@ mutation deleteChannel(
             id
             project_id
             name
-            user_id {
+            user_id
+            user {
                 id
                 name
                 profile
@@ -314,7 +323,8 @@ mutation addChannelMembers(
             id
             project_id
             name
-            user_id {
+            user_id
+            user {
                 id
                 name
                 profile
@@ -350,7 +360,8 @@ mutation removeChannelMembers(
             id
             project_id
             name
-            user_id {
+            user_id
+            user {
                 id
                 name
                 profile

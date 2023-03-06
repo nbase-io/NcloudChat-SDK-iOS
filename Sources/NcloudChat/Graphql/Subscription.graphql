@@ -14,6 +14,12 @@ mutation createSubscription (
             id
             channel_id
             user_id
+            user {
+                id
+                name
+                profile
+                customField
+            }
             language
             push
             mute
@@ -52,6 +58,12 @@ mutation deleteSubscription (
             id
             channel_id
             user_id
+            user {
+                id
+                name
+                profile
+                customField
+            }
             language
             push
             mute
@@ -96,6 +108,12 @@ mutation updateSubscription(
             id
             channel_id
             user_id
+            user {
+                id
+                name
+                profile
+                customField
+            }
             language
             push
             mute
@@ -131,21 +149,34 @@ query subscription (
         id:$id
     ) {
         id
+        channel_id
+        user_id
         user {
+            id
             name
             profile
-            country
+            customField
+        }
+        language
+        push
+        mute
+        online
+        channel {
+            name
+            type
+            image_url
+            push
+            disabled
         }
         mark {
             user_id
             message_id
             sort_id
+            unread
         }
-        channel_id
-        user_id
-        online
-        push
+        uniquekey
         created_at
+        updated_at
     }
 }
 
@@ -165,16 +196,34 @@ query subscriptions (
         edges {
             node {
                 id
-                user {
-                    name
-                    profile
-                    country
-                }
                 channel_id
                 user_id
-                online
+                user {
+                    id
+                    name
+                    profile
+                    customField
+                }
+                language
                 push
+                mute
+                online
+                channel {
+                    name
+                    type
+                    image_url
+                    push
+                    disabled
+                }
+                mark {
+                    user_id
+                    message_id
+                    sort_id
+                    unread
+                }
+                uniquekey
                 created_at
+                updated_at
             }
         }
     }

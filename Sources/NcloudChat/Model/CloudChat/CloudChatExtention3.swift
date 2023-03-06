@@ -6,7 +6,7 @@
 //
 
 extension CloudChat {
-    
+    /*
     public func getPin(id: String, channelId: String, completionHandler: @escaping (CustomResult<Any?, CustomError>) -> Void) {
         guard let projectId = CoreManager.shared.projectId, !projectId.isEmpty else {
             completionHandler(.failure(.noProjectId))
@@ -147,7 +147,7 @@ extension CloudChat {
             }
         }
     }
-    
+    */
     public static func applicationWillEnterForeground() {
         if CoreManager.shared.isSocketExist, !CoreManager.shared.token.isEmpty {
             try? CoreManager.shared.connectSocket()

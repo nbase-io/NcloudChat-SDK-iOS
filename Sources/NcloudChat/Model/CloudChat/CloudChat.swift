@@ -5,7 +5,7 @@
 //  Created by Han Dole Kim on 10/13/22.
 //
 
-import Foundation
+import UIKit
 
 public class CloudChat {
     
@@ -88,9 +88,10 @@ public class CloudChat {
                 if ((graphQLResult.data?.login?.token) != nil) {
                     CoreManager.shared.token = (graphQLResult.data?.login?.token)!
                     CoreManager.shared.setApolloToken()
+                    let uuid = UIDevice.current.identifierForVendor?.uuidString
                     
                     // update member info
-                    CoreManager.shared.apollo.perform(mutation: UpdateMemberMutation(id: userId, projectId: projectId, name: name, profile: profile, adid: "n/a", device: CoreManager.shared.getOSVersion(), push: false, network: CoreManager.shared.getNetworkType(), version: CoreManager.shared.getVersion(), model: CoreManager.shared.getDeviceModel(), notications: NoticationInput(token: nil, device: "APNS", os: "ios"))) {
+                    CoreManager.shared.apollo.perform(mutation: UpdateMemberMutation(id: userId, projectId: projectId, name: name, profile: profile, remoteip: "", memo: "", adid: uuid, device: CoreManager.shared.getOSVersion(), deviceType: ["iOS"], network: CoreManager.shared.getNetworkType(), version: CoreManager.shared.getVersion(), model: CoreManager.shared.getDeviceModel(), notications: NoticationInput(token: CoreManager.shared.pushToken, device: "APNS", os: "ios"))) {
                         result in
                         switch result {
                         case .success(let graphQLResult):
