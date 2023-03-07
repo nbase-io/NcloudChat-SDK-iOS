@@ -127,7 +127,7 @@ extenstion CustomViewController: CloudChatDelegate {
     func onMemberJoined(data: Any) { }
     
     // CloudChat 구독 채널 맴버가 채널 퇴장 시 전달되는 이벤트
-    func onMemberLeaved(data: Any) { }
+    func onMemberLeft(data: Any) { }
     
     // CloudChat 채널 맴버 업데이트 시 전달되는 이벤트
     func onMemberUpdated(data: Any) { }
@@ -135,23 +135,14 @@ extenstion CustomViewController: CloudChatDelegate {
     // CloudChat 채널 맴버 삭제 시 전달되는 이벤트
     func onMemberDeleted(data: Any) { }
     
-    // CloudChat 유저 차단 시 전달되는 이벤트
-    func onUserBanned(data: Any) { }
-    
-    // CloudChat 유저 삭제 시 전달되는 이벤트
-    func onUserDeleted(data: Any) { }
-    
-    // CloudChat 유저 업데이트 시 전달되는 이벤트
-    func onUserUpdated(data: Any) { }
+    // CloudChat 채널 맴버 차단 시 전달되는 이벤트
+    func onMemberBanned(data: Any) { }
     
     // CloudChat Socket 재연결 시 전달되는 이벤트
     func onReconnect(data: Any) { }
     
     // CloudChat Socket 재연결 시도 시 전달되는 이벤트
     func onReconnectAttempt(data: Any) { }
-    
-    // CloudChat "result" 수신 시 전달되는 이벤트
-    func onResult(data: Any) { }
 
     // CloudChat Error 발생 Socket 연결 해제 시 전달되는 이벤트
     func onError(error: Any) { }
