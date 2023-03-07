@@ -213,6 +213,10 @@ class CoreManager {
             guard let dataInfo = dataArray.first else { return }
             self.delegate?.onMessage?(data: dataInfo)
         }
+        socket.on("message deleted") { dataArray, AckCallback in
+            guard let dataInfo = dataArray.first else { return }
+            self.delegate?.onMessageDeleted?(data: dataInfo)
+        }
         socket.on("start typing") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
             self.delegate?.onStartTyping?(data: dataInfo)

@@ -113,6 +113,9 @@ extenstion CustomViewController: CloudChatDelegate {
 
     // CloudChat Message 수신 시 전달되는 이벤트
     func onMessage(data: Any) { }
+    
+    // CloudChat Message 삭제 시 전달되는 이벤트
+    func onMessageDeleted(data: Any) { }
 
     // CloudChat "start typing" 수신 시 전달되는 이벤트
     func onStartTyping(data: Any) { }

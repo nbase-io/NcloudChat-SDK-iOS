@@ -16,6 +16,7 @@ public protocol CloudChatDelegate {
     /// Emitted every time there is a change in the client's status.
     @objc optional func onStatusChange(status: Any)
     @objc optional func onMessage(data: Any)
+    @objc optional func onMessageDeleted(data: Any)
     @objc optional func onStartTyping(data: Any)
     @objc optional func onStopTyping(data: Any)
     @objc optional func onEvent(data: Any)
