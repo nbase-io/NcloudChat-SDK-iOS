@@ -136,7 +136,6 @@ class CoreManager {
     }
     
     private func save(_ data: Data, service: String = "token", account: String = "ncloudchat") {
-        print("SAVE")
         let query = [
             kSecValueData: data,
             kSecClass: kSecClassGenericPassword,
