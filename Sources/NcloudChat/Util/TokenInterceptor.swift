@@ -22,7 +22,6 @@ class TokenInterceptor: ApolloInterceptor {
         completion: @escaping (Result<GraphQLResult<Operation.Data>, Error>) -> Void) where Operation : GraphQLOperation {
             request.addHeader(name: "Authorization", value: "Bearer \(token)")
             request.addHeader(name: "Language", value: CoreManager.shared.language!)
-            print(request.additionalHeaders)
             chain.proceedAsync(request: request, response: response, completion: completion)
     }
     

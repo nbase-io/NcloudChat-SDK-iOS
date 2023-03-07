@@ -20,7 +20,6 @@ class CoreManager {
     weak var delegate: CloudChatDelegate?
     lazy var apollo: ApolloClient = {
         let endpointURL = URL(string: "\(serverURL)/graphql")!
-        print("Apollo without token: \(endpointURL)")
         return ApolloClient(url: endpointURL)
     }()
     
@@ -147,9 +146,9 @@ class CoreManager {
         
         let saveStatus = SecItemAdd(query, nil)
         
-        if saveStatus != errSecSuccess {
+//        if saveStatus != errSecSuccess {
             //            print("Error: \(saveStatus)")
-        }
+//        }
         
         if saveStatus == errSecDuplicateItem {
             update(data, service: service, account: account)
@@ -157,7 +156,6 @@ class CoreManager {
     }
     
     private func update(_ data: Data, service: String = "token", account: String = "ncloudchat") {
-        print("UPDATE")
         let query = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
@@ -169,7 +167,6 @@ class CoreManager {
     }
     
     private func read(service: String = "token", account: String = "ncloudchat") -> Data? {
-        print("READ")
         let query = [
             kSecClass: kSecClassGenericPassword,
             kSecAttrService: service,
@@ -196,91 +193,71 @@ class CoreManager {
         guard let socket = socket else { throw CustomError.noSocket }
         socket.removeAllHandlers()
         socket.on(clientEvent: .connect) { dataArray, AckCallback in
-            print(self.serverURL)
-            print("\(self.socketURL)\(socket.nsp), \(String(describing: socket.handlers.count)) handlers")
             self.delegate?.onConnect?()
         }
         socket.on(clientEvent: .disconnect) { dataArray, AckCallback in
-            print(dataArray.jsonValue)
             self.delegate?.onDisconnect?()
         }
         socket.on(clientEvent: .statusChange) { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataArray)
             self.delegate?.onStatusChange?(status: dataInfo)
         }
         socket.on(clientEvent: .reconnect) { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataArray)
             self.delegate?.onReconnect?(data: dataInfo)
         }
         socket.on(clientEvent: .reconnectAttempt) { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataArray)
             self.delegate?.onReconnectAttempt?(data: dataInfo)
         }
         socket.on("message") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onMessage?(data: dataInfo)
         }
         socket.on("start typing") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onStartTyping?(data: dataInfo)
         }
         socket.on("stop typing") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onStopTyping?(data: dataInfo)
         }
         socket.on("event") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
         }
         socket.on("member joined") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onMemberJoined?(data: dataInfo)
         }
         socket.on("member leaved") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onMemberLeaved?(data: dataInfo)
         }
         socket.on("member updated") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onMemberUpdated?(data: dataInfo)
         }
         socket.on("member deleted") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onMemberDeleted?(data: dataInfo)
         }
         socket.on("user banned") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onUserBanned?(data: dataInfo)
         }
         socket.on("user deleted") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onUserDeleted?(data: dataInfo)
         }
         socket.on("user updated") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print(dataInfo)
             self.delegate?.onUserUpdated?(data: dataInfo)
         }
         socket.on("result") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            print("RESULT")
-            print(dataInfo)
             self.delegate?.onResult?(data: dataInfo)
         }
         socket.on(clientEvent: .error) { dataArray, AckCallback in
-            print("ERROR")
             self.delegate?.onError?(error: dataArray)
             for dataInfo in dataArray {
                 guard let dataString = dataInfo as? String, let data = dataString.data(using: .utf8) else { return }
@@ -383,7 +360,6 @@ class CoreManager {
         guard let socket = socket else { throw CustomError.noSocket }
         socket.disconnect()
         socket.removeAllHandlers()
-        print("socket disconnect")
     }
     
     public func resetApollo() {
@@ -399,8 +375,6 @@ class CoreManager {
             interceptors: [TokenInterceptor(token: token)],
             store: store
         )
-        print(endpointURL)
-        print("apollo token: \(token)")
         let networkTransport = RequestChainNetworkTransport(interceptorProvider: interceptorProvider, endpointURL: endpointURL)
         
         self.apollo = ApolloClient(networkTransport: networkTransport, store: store)

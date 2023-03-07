@@ -101,7 +101,6 @@ extension CloudChat {
             case .success(let data):
                 completionHandler(.success(String(describing: data)))
             case .failure(let error):
-                print("nc fail \(error.localizedDescription)")
                 completionHandler(.failure(.failed(message: error.localizedDescription)))
             }
         }

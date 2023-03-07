@@ -108,7 +108,6 @@ public class CloudChat {
                             }
                             
                         case .failure(let error):
-                            print("fail")
                             completionHandler(.failure(.failed(message: error.localizedDescription)))
                             return
                         }
