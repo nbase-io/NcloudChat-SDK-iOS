@@ -222,16 +222,13 @@ class CoreManager {
             guard let dataInfo = dataArray.first else { return }
             self.delegate?.onStopTyping?(data: dataInfo)
         }
-        socket.on("event") { dataArray, AckCallback in
-            guard let dataInfo = dataArray.first else { return }
-        }
         socket.on("member joined") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
             self.delegate?.onMemberJoined?(data: dataInfo)
         }
         socket.on("member leaved") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            self.delegate?.onMemberLeaved?(data: dataInfo)
+            self.delegate?.onMemberLeft?(data: dataInfo)
         }
         socket.on("member updated") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
@@ -241,17 +238,9 @@ class CoreManager {
             guard let dataInfo = dataArray.first else { return }
             self.delegate?.onMemberDeleted?(data: dataInfo)
         }
-        socket.on("user banned") { dataArray, AckCallback in
+        socket.on("member banned") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
-            self.delegate?.onUserBanned?(data: dataInfo)
-        }
-        socket.on("user deleted") { dataArray, AckCallback in
-            guard let dataInfo = dataArray.first else { return }
-            self.delegate?.onUserDeleted?(data: dataInfo)
-        }
-        socket.on("user updated") { dataArray, AckCallback in
-            guard let dataInfo = dataArray.first else { return }
-            self.delegate?.onUserUpdated?(data: dataInfo)
+            self.delegate?.onMemberBanned?(data: dataInfo)
         }
         socket.on("result") { dataArray, AckCallback in
             guard let dataInfo = dataArray.first else { return }
