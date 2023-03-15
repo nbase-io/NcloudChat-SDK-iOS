@@ -40,6 +40,11 @@ public class CloudChat {
         CoreManager.shared.socketURL = url
     }
     
+    public static func setPushToken(deviceToken: Data) {
+        let pushTokenString = deviceToken.map{ data in String(format: "%02.2hhx", data) }.joined()
+        CoreManager.shared.pushToken = pushTokenString
+    }
+    
     public func isConnected() -> Bool {
         return CoreManager.shared.isConnected
     }
