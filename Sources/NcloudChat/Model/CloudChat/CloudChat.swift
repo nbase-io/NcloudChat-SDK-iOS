@@ -106,7 +106,7 @@ public class CloudChat {
                             // connect socket
                             do {
                                 try CoreManager.shared.connectSocket()
-                                completionHandler(.success("Connected:  \(CoreManager.shared.token)"))
+                                completionHandler(.success("Connected:  \(CoreManager.shared.token), PushToken: \(CoreManager.shared.pushToken)"))
                             } catch {
                                 completionHandler(.failure(.failToConnect))
                                 return
