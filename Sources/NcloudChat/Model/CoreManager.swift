@@ -145,9 +145,6 @@ class CoreManager {
         
         let saveStatus = SecItemAdd(query, nil)
         
-//        if saveStatus != errSecSuccess {
-            //            print("Error: \(saveStatus)")
-//        }
         
         if saveStatus == errSecDuplicateItem {
             update(data, service: service, account: account)
@@ -245,10 +242,6 @@ class CoreManager {
             guard let dataInfo = dataArray.first else { return }
             self.delegate?.onMemberBanned?(data: dataInfo)
         }
-        socket.on("result") { dataArray, AckCallback in
-            guard let dataInfo = dataArray.first else { return }
-            self.delegate?.onResult?(data: dataInfo)
-        }
         socket.on(clientEvent: .error) { dataArray, AckCallback in
             self.delegate?.onError?(error: dataArray)
             for dataInfo in dataArray {
@@ -329,9 +322,8 @@ class CoreManager {
         let url = URL(string: socketURL)
         guard let projectId = projectId else { throw CustomError.notInitialized}
         guard let user = user else { throw CustomError.noUser }
-        
         // initialize Socket Manager
-        socketManager = SocketManager.init(socketURL: url!, config: [.log(false), .compress, .forceNew(true), .reconnects(true), .reconnectAttempts(20), .reconnectWaitMax(5), .reconnectWait(3), .randomizationFactor(0.5), .forceWebsockets(true), .connectParams(["project_id": projectId, "user_id": user.id, "token": token, "EIO": "3", "customField": customField ?? "", "language": language ?? "en", "image": user.profile, "name": user.name])])
+        socketManager = SocketManager.init(socketURL: url!, config: [.log(false), .forcePolling(false), .forceWebsockets(true), .connectParams(["project_id": projectId, "user_id": user.id, "token": token, "EIO": "4", "customField": customField ?? "", "language": language ?? "en", "image": user.profile, "name": user.name])])
         socket = socketManager?.socket(forNamespace: "/cloudchat")
         
         

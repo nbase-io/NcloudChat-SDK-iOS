@@ -19,7 +19,6 @@ public protocol CloudChatDelegate {
     @objc optional func onMessageDeleted(data: Any)
     @objc optional func onStartTyping(data: Any)
     @objc optional func onStopTyping(data: Any)
-    @objc optional func onEvent(data: Any)
     @objc optional func onMemberJoined(data: Any)
     @objc optional func onMemberLeft(data: Any)
     @objc optional func onMemberUpdated(data: Any)
@@ -29,6 +28,5 @@ public protocol CloudChatDelegate {
     @objc optional func onReconnect(data: Any)
     /// Emitted each time the client tries to reconnect to the server.
     @objc optional func onReconnectAttempt(data: Any)
-    @objc optional func onResult(data: Any)
     @objc optional func onError(error: Any)
 }
