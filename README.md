@@ -856,9 +856,29 @@ nc.getFriendships(
 | per_page | Int | 소트하고자 하는 필드의 필터를 정의합니다 |
 ---
 ## **9. 푸시 알림**
-Ncloud Chat 은 SENS 를 통한 푸시 알림만을 지원합니다.
-**iOS Push 설정을 위한 용도로 Dashboard >> 설정 >> 프로젝트 설정 >> SENS Push 가 설정 되어야 
-사용 가능합니다.**
+Ncloud Chat 은 SENS 를 통한 푸시 알림만을 지원합니다. 푸시를 사용하기 위해서는 Push Service 인증키가 필요합니다. Ncloud Chat 푸시를 사용하기 위한 절차는 아래와 같습니다.
+1. Apple Developer로 로그인 합니다. 
+2. Account >> Certificates, Identifiers & Profiles >> Identifiers로 이동합니다.
+3. 파란색 + 버튼을 눌러 App ID를 생성합니다.
+4. Capabilities에서 Push Notifications를 활성화 합니다.
+5. Bundle ID를 입력하고 Continue를 눌러서 App ID 등록을 완료 합니다.
+6. (OSX 기준) Keychain Access를 실행하고, 상단 메뉴에서 Keychain Access >> Certificate Assistant >> Request a Certificate from a Certificate Authority를 선택합니다.
+7. 이메일 주소를 입력하고 Common Name을 입력합니다. (Common Name은 Bundle ID와 동일하게 입력합니다.) 그리고 Continue를 눌러서 인증서를 생성합니다 (디스크에 저장).
+8. 인증서 생성후 다시 Apple Developer 웹사이트로 돌아와, App ID를 선택하고 Edit을 눌러서 개발/배포 Create Certificate을 클릭합니다.
+9. 위에 생성했던 인증서를 업로드 하고 Continue를 눌러서 인증서를 등록합니다.
+10. 생성된 Certification을 다운로드 하여 Keychain Access에 등록합니다.
+11. Keychain Access에서 등록된 Certification을 찾습니다. 개발용은 "Apple Development IOS Push Services: {Bundle ID}"로 되어 있고, 배포용은 "Apple Push Services: {Bundle ID}"로 되어 있습니다.
+12. 등록된 Certification 왼쪽에 있는 세모 아이콘을 눌러서 밑에 키가 매칭되는지 확인합니다. 만약 매칭되어 있지 않다면, 인증서 생성부터 다시 작업합니다.
+13. Certification이 매칭되어 있다면, "Certification만" 선택 후, 마우스 우클릭을 하여 Export를 선택합니다.
+14. KeyChain Access에서 Export를 선택 후, 인증서에 사용될 암호를 입력하면 .p12 파일이 생성됩니다.
+15. NAVER CLOUD PLATFORM 콘솔로 이동합니다.
+16. My Products >> SENS >> PUSH >> Certificate로 이동 합니다.
+17. 프로젝트를 선택하고, APNS 탭으로 이동합니다.
+18. .p12 파일을 업로드 하고, 파일 암호를 입력합니다.
+19. 프로젝트 타입과 App ID를 입력하고 저장 합니다 (인증서는 Sandbox인증서 등록 시 개발 시에만 사용 가능함으로 Production 인증서로 등록하는 것을 권장 드립니다).
+20. NAVER CLOUD PLATFORM 콘솔 SENS >> Project 에서 해당 프로젝트의 Push Service ID를 복사합니다.
+21. Ncloud Chat 대시보드로 이동합니다. 
+22. **iOS Push 설정을 위한 용도로 Dashboard >> 설정 >> 프로젝트 설정 >> SENS Push를 설정합니다. (스위치 on 그리고 SENS Push Service ID를 입력해 주세요.)**  
 
 푸시 알림 발송 규칙
 - 푸시 알림은 새 메시지에 대해서 발송됩니다.
